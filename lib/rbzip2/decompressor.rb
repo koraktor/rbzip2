@@ -666,11 +666,15 @@ module RBzip2::Decompressor
   end
 
   def size
-    @io.size
+    if @io.is_a? StringIO
+      @io.size
+    elsif @io.is_a? File
+      @io.stat.size
+    end
   end
 
   def uncompressed
-    @last
+    @last + 1
   end
 
   def inspect
