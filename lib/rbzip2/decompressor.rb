@@ -15,23 +15,22 @@ module RBzip2::Decompressor
     @bytes_read += read if read != -1
   end
 
-  def read(length = 1)
-    if length == 1
-      raise 'stream closed' if @io.nil?
+  def read(length = uncompressed)
+    raise 'stream closed' if @io.nil?
 
+    if length == 1
       r = read0
       count (r < 0 ? -1 : 1)
       r
-    else
+    elsif length > 0
       r = StringIO.new
-      b = 0
       length.times do
         b = read0
         break if b < 0
         r.write b.chr
       end
       count r.size
-      r
+      r.string
     end
   end
 
