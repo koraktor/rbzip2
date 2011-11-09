@@ -83,7 +83,7 @@ module RBzip2::Decompressor
     check_magic
 
     block_size = @io.read(1).to_i
-    raise "Illegal block size." if block_size < 1 || block_size > 9
+    raise 'Illegal block size.' if block_size < 1 || block_size > 9
     @block_size = block_size
 
     init_block
@@ -91,7 +91,7 @@ module RBzip2::Decompressor
   end
 
   def check_magic
-    raise "Magic number does not match 'BZh'." unless @io.read(3) == 'BZh'
+    raise 'Magic number does not match "BZh".' unless @io.read(3) == 'BZh'
   end
 
   def init_block
