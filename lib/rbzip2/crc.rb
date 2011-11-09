@@ -90,15 +90,15 @@ class RBzip2::CRC
     if repeat == -1
       temp = ((@global_crc >> 24) ^ in_ch) % 256
       temp = 256 + temp if temp < 0
-      @global_crc = ((@global_crc << 8) ^ CRC32_TABLE[temp]) % 2**32
+      @global_crc = ((@global_crc << 8) ^ CRC32_TABLE[temp]) & 0xffffffff
     else
       global_crc_shadow = @global_crc
-      repeat.downto(0) do
-        temp = ((global_crc_shadow >> 24) ^ in_ch) % 256
+      repeat.times do
+        temp = (global_crc_shadow >> 24) ^ in_ch
         temp = 256 + temp if temp < 0
-        global_crc_shadow = (global_crc_shadow << 8) ^ CRC32_TABLE[temp]
+        global_crc_shadow = ((global_crc_shadow << 8) ^ CRC32_TABLE[temp]) & 0xffffffff
       end
-      @global_crc = global_crc_shadow % 2**32
+      @global_crc = global_crc_shadow
     end
   end
 
