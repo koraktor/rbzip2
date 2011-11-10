@@ -5,9 +5,7 @@
 
 require 'stringio'
 
-require 'rbzip2/crc'
 require 'rbzip2/constants'
-require 'rbzip2/data'
 
 class RBzip2::Decompressor
 
