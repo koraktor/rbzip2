@@ -9,7 +9,20 @@ require 'rbzip2/crc'
 require 'rbzip2/constants'
 require 'rbzip2/data'
 
-module RBzip2::Decompressor
+class RBzip2::Decompressor
+
+  def initialize(io)
+    @buff = 0
+    @bytes_read = 0
+    @computed_combined_crc = 0
+    @crc = RBzip2::CRC.new
+    @current_char = -1
+    @io = io
+    @live = 0
+    @stored_combined_crc = 0
+    @su_t_pos = 0
+    init
+  end
 
   def count(read)
     @bytes_read += read if read != -1
