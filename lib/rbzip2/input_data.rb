@@ -5,7 +5,7 @@
 
 require 'rbzip2/constants'
 
-class RBzip2::Data
+class RBzip2::InputData
 
   attr_reader :base, :cftab, :get_and_move_to_front_decode_yy, :in_use,
               :limit, :ll8, :min_lens, :perm, :receive_decoding_tables_pos,

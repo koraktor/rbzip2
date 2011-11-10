@@ -118,7 +118,7 @@ class RBzip2::Decompressor
       @stored_block_crc = int
       @block_randomised = bit
 
-      @data = RBzip2::Data.new @block_size if @data.nil?
+      @data = RBzip2::InputData.new @block_size if @data.nil?
 
       get_and_move_to_front_decode
 
