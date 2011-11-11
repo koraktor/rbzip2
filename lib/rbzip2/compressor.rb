@@ -372,13 +372,13 @@ class RBzip2::Compressor
   end
 
   def init
-    put_byte 'B'
-    put_byte 'Z'
+    put_byte 0x42
+    put_byte 0x5a
 
     @data = RBzip2::OutputData.new @block_size
 
-    put_byte 'h'
-    put_byte @block_size.to_s
+    put_byte 0x68
+    put_byte 0x30 + @block_size
 
     @combined_crc = 0
     init_block
