@@ -11,20 +11,31 @@ operating systems supported by those implementations.
 
 ## Features
 
- * Decompression of bzip2 compressed IOs (like `File` or `StringIO`)
+ * Compression of raw data into bzip2 compressed `IO`s (like `File` or
+   `StringIO`)
+ * Decompression of bzip2 compressed `IO`s (like `File` or `StringIO`)
 
 ## Usage
 
     require 'rbzip2'
 
-    file = File.new 'somefile.bz2'  # open a compressed file
-    io   = RBzip2::IO.new file      # wrap the file into RBzip2's IO
-    data = io.read                  # read data into a string
+### Compression
+
+    data = some_data
+    file = File.new 'somefile.bz2'      # open the target file
+    bz2  = RBzip2::Compressor.new file  # wrap the file into the compressor
+    bz2.write data                      # write the raw data to the compressor
+    bz2.close                           # finish compression (important!)
+
+### Decompression
+
+    file = File.new 'somefile.bz2'        # open a compressed file
+    bz2  = RBzip2::Decompressor.new file  # wrap the file into the decompressor
+    data = io.read                        # read data into a string
 
 ## Future plans
 
  * Simple decompression of strings
- * Compression of raw data
  * Simple creation of compressed files
  * Two-way compressed IO that will (de)compress as you read/write
 
@@ -38,6 +49,14 @@ To use it as a dependency managed by Bundler add the following to your
 `Gemfile`:
 
     gem 'rbzip2'
+
+## Performance
+
+Due to its pure Ruby implementation RBzip2 is inherently slower than
+bzip2-ruby, which is a Ruby binding to libbzip2. Currently, RBzip2 is a plain
+port of Apache Commons' Java code to Ruby and no effort has been made to
+optimize it. That's why RBzip2 is slower by a factor of about 140/1000 while
+compressing/decompressing (on Ruby 1.9.3). Ruby 1.8.7 is even slower.
 
 ## License
 
