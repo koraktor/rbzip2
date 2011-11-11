@@ -26,21 +26,29 @@ class RBzip2::Decompressor
     @bytes_read += read if read != -1
   end
 
-  def read(length = uncompressed)
+  def read(length = nil)
     raise 'stream closed' if @io.nil?
 
     if length == 1
       r = read0
       count (r < 0 ? -1 : 1)
       r
-    elsif length > 0
+    else
       r = StringIO.new
-      length.times do
-        b = read0
-        break if b < 0
-        r.write b.chr
+      if length == nil
+        loop do
+          b = read0
+          break if b < 0
+          r.write b.chr
+        end
+      elsif length > 0
+        length.times do
+          b = read0
+          break if b < 0
+          r.write b.chr
+        end
+        count r.size
       end
-      count r.size
       r.string
     end
   end
