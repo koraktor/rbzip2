@@ -188,7 +188,7 @@ class RBzip2::Compressor
   def block_sort
     @work_limit = WORK_FACTOR * @last
     @work_done = 0
-    @block_randomised = false
+    @block_randomized = false
     @first_attempt = true
     main_sort
 
@@ -235,7 +235,7 @@ class RBzip2::Compressor
 
     put_int @block_crc
 
-    @block_randomised ? w(1, 1) : w(1, 0)
+    @block_randomized ? w(1, 1) : w(1, 0)
 
     move_to_front_code_and_send
   end
