@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rbzip2 (0.1.0)
+    rbzip2 (0.2.0)
 
 GEM
   remote: http://rubygems.org/

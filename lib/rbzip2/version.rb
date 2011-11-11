@@ -5,6 +5,6 @@
 
 module RBzip2
 
-  VERSION = '0.1.0' unless const_defined? :VERSION
+  VERSION = '0.2.0' unless const_defined? :VERSION
 
 end
