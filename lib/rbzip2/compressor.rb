@@ -161,8 +161,10 @@ class RBzip2::Compressor
     n += p1
     while p1 < n
       t = fmap[p1]
-      fmap[p1 += 1] = fmap[p2]
-      fmap[p2 += 1] = t
+      fmap[p1] = fmap[p2]
+      fmap[p2] = t
+      p1 += 1
+      p2 += 1
     end
   end
 
@@ -191,7 +193,7 @@ class RBzip2::Compressor
     main_sort
 
     if @first_attempt && @work_done > @work_limit
-      randomise_block
+      randomize_block
       @work_limit = @work_done = 0
       @first_attempt = false
       main_sort
@@ -410,13 +412,13 @@ class RBzip2::Compressor
     RBzip2::NUM_OVERSHOOT_BYTES.times do |i|
       block[last_shadow + i + 2] = block[(i % (last_shadow + 1)) + 1]
     end
-    (last_shadow + RBzip2::NUM_OVERSHOOT_BYTES + 1).times do |i|
+    (last_shadow + RBzip2::NUM_OVERSHOOT_BYTES).times do |i|
       quadrant[i] = 0
     end
     block[0] = block[last_shadow + 1]
 
     c1 = block[0] & 0xff
-    1.upto(last_shadow) do |i|
+    (last_shadow + 1).times do |i|
       c2 = block[i + 1] & 0xff
       ftab[(c1 << 8) + c2] += 1
       c1 = c2
@@ -431,7 +433,7 @@ class RBzip2::Compressor
       c1 = c2
     end
 
-    fmap[--ftab[((block[last_shadow + 1] & 0xff) << 8) + (block[1] & 0xff)]] = last_shadow
+    fmap[ftab[((block[last_shadow + 1] & 0xff) << 8) + (block[1] & 0xff)] -= 1] = last_shadow
 
     256.times do |i|
       big_done[i] = false
@@ -441,7 +443,7 @@ class RBzip2::Compressor
     h = 364
     while h != 1
       h /= 3
-      256.times do |i|
+      h.upto(255) do |i|
         vv = running_order[i]
         a = ftab[(vv + 1) << 8] - ftab[vv << 8]
         b = h - 1
@@ -449,10 +451,10 @@ class RBzip2::Compressor
 
         ro = running_order[j - h]
         while ftab[(ro + 1) << 8] - ftab[ro << 8] > a
-          ro = running_order[j - h]
           running_order[j] = ro
           j -= h
           break if j <= b
+          ro = running_order[j - h]
         end
 
         running_order[j] = vv
@@ -514,7 +516,284 @@ class RBzip2::Compressor
   end
 
   def main_qsort3(data_shadow, lo_st, hi_st, d_st)
-    raise NotImplementedError
+    stack_ll = data_shadow.stack_ll
+    stack_hh = data_shadow.stack_hh
+    stack_dd = data_shadow.stack_dd
+    fmap     = data_shadow.fmap
+    block    = data_shadow.block
+
+    stack_ll[0] = lo_st
+    stack_hh[0] = hi_st
+    stack_dd[0] = d_st
+
+    sp = 1
+    while (sp -= 1) >= 0
+      lo = stack_ll[sp]
+      hi = stack_hh[sp]
+      d  = stack_dd[sp]
+
+      if (hi - lo < RBzip2::SMALL_THRESH) || (d > RBzip2::DEPTH_THRESH)
+        return if main_simple_sort data_shadow, lo, hi, d
+      else
+        d1 = d + 1
+        med = self.class.med3(block[fmap[lo] + d1], block[fmap[hi] + d1], block[fmap[(lo + hi) >> 1] + d1]) & 0xff
+
+        un_lo = lo
+        un_hi = hi
+        lt_lo = lo
+        gt_hi = hi
+
+        while true
+          while un_lo <= un_hi
+            n = (block[fmap[un_lo] + d1] & 0xff) - med
+            if n == 0
+              temp = fmap[un_lo]
+              fmap[un_lo] = fmap[lt_lo]
+              fmap[lt_lo] = temp
+              un_lo += 1
+              lt_lo += 1
+            elsif n < 0
+              un_lo += 1
+            else
+              break
+            end
+          end
+
+          while un_lo <= un_hi
+            n = (block[fmap[un_hi] + d1] & 0xff) - med
+            if n == 0
+              temp = fmap[un_hi]
+              fmap[un_hi] = fmap[gt_hi]
+              fmap[gt_hi] = temp
+              un_hi -= 1
+              gt_hi -= 1
+            elsif n > 0
+              un_hi -= 1
+            else
+              break
+            end
+          end
+
+          if un_lo <= un_hi
+            temp = fmap[un_lo]
+            fmap[un_lo] = fmap[un_hi]
+            fmap[un_hi] = temp
+            un_lo += 1
+            un_hi -= 1
+          else
+            break
+          end
+        end
+
+        if gt_hi < lt_lo
+          stack_ll[sp] = lo
+          stack_hh[sp] = hi
+          stack_dd[sp] = d1
+          sp += 1
+        else
+          n = ((lt_lo - lo) < (un_lo - lt_lo)) ? (lt_lo - lo) : (un_lo - lt_lo)
+          self.class.vswap fmap, lo, un_lo - n, n
+          m = ((hi - gt_hi) < (gt_hi - un_hi)) ? (hi - gt_hi) : (gt_hi - un_hi)
+          self.class.vswap fmap, un_lo, hi - m + 1, m
+
+          n = lo + un_lo - lt_lo - 1
+          m = hi - (gt_hi - un_hi) + 1
+
+          stack_ll[sp] = lo
+          stack_hh[sp] = n
+          stack_dd[sp] = d
+          sp += 1
+
+          stack_ll[sp] = n + 1
+          stack_hh[sp] = m - 1
+          stack_dd[sp] = d1
+          sp += 1
+
+          stack_ll[sp] = m
+          stack_hh[sp] = hi
+          stack_dd[sp] = d
+          sp += 1
+        end
+      end
+    end
+  end
+
+  def main_simple_sort(data_shadow, lo, hi, d)
+    big_n = hi - lo + 1
+    return @first_attempt && (@work_done > @work_limit) if big_n < 2
+
+    hp = 0
+    while RBzip2::INCS[hp] < big_n
+      hp += 1
+    end
+
+    fmap = data_shadow.fmap
+    quadrant = data_shadow.quadrant
+    block = data_shadow.block
+    last_shadow = @last
+    last_plus_1 = last_shadow + 1
+    first_attempt_shadow = @first_attempt
+    work_limit_shadow = @work_limit
+    work_done_shadow = @work_done
+
+    a = nil
+    h = nil
+    i1 = nil
+    i2 = nil
+    j = nil
+    mj = nil
+    once_runned = nil
+    vd = nil
+    x = nil
+
+    x_loop = lambda do
+      while x > 0
+        x -= 4
+
+        if block[i1 + 1] == block[i2 + 1]
+          if quadrant[i1] == quadrant[i2]
+            if block[i1 + 2] == block[i2 + 2]
+              if quadrant[i1 + 1] == quadrant[i2 + 1]
+                if block[i1 + 3] == block[i2 + 3]
+                  if quadrant[i1 + 2] == quadrant[i2 + 2]
+                    if block[i1 + 4] == block[i2 + 4]
+                      if quadrant[i1 + 3] == quadrant[i2 + 3]
+                        i1 -= last_plus_1 if (i1 += 4) >= last_plus_1
+                        i2 -= last_plus_1 if (i2 += 4) >= last_plus_1
+                        work_done_shadow += 1
+                        next
+                      elsif quadrant[i1 + 3] > quadrant[i2 + 3]
+                        return true
+                      else
+                        return false
+                      end
+                    elsif (block[i1 + 4] & 0xff) > (block[i2 + 4] & 0xff)
+                      return true
+                    else
+                      return false
+                    end
+                  elsif quadrant[i1 + 2] > quadrant[i2 + 2]
+                    return true
+                  else
+                    return false
+                  end
+                elsif (block[i1 + 3] & 0xff) > (block[i2 + 3] & 0xff)
+                  return true
+                else
+                  return false
+                end
+              elsif quadrant[i1 + 1] > quadrant[i2 + 1]
+                return true
+              else
+                return false
+              end
+            elsif (block[i1 + 2] & 0xff) > (block[i2 + 2] & 0xff)
+              return true
+            else
+              return false
+            end
+          elsif (quadrant[i1] > quadrant[i2])
+            return true
+          else
+            return false
+          end
+        elsif (block[i1 + 1] & 0xff) > (block[i2 + 1] & 0xff)
+          return true
+        else
+          return false
+        end
+      end
+
+      true
+    end
+
+    hammer_loop = lambda do
+      a = 0
+
+      while true do
+        if once_runned
+          fmap[j] = a
+          break if (j -= h) <= mj
+        else
+          once_runned = true
+        end
+
+        a = fmap[j - h]
+        i1 = a + d
+        i2 = vd
+
+        if block[i1 + 1] == block[i2 + 1]
+          if block[i1 + 2] == block[i2 + 2]
+            if block[i1 + 3] == block[i2 + 3]
+              if block[i1 + 4] == block[i2 + 4]
+                if block[i1 + 5] == block[i2 + 5]
+                  if block[i1 += 6] == block[i2 += 6]
+                    x = last_shadow
+
+                    break unless x_loop.call
+                  else
+                    if (block[i1] & 0xff) > (block[i2] & 0xff)
+                      next
+                    else
+                      break
+                    end
+                  end
+                elsif (block[i1 + 5] & 0xff) > (block[i2 + 5] & 0xff)
+                  next
+                else
+                  break
+                end
+              elsif (block[i1 + 4] & 0xff) > (block[i2 + 4] & 0xff)
+                next
+              else
+                break
+              end
+            elsif (block[i1 + 3] & 0xff) > (block[i2 + 3] & 0xff)
+              next
+            else
+              break
+            end
+          elsif (block[i1 + 2] & 0xff) > (block[i2 + 2] & 0xff)
+            next
+          else
+            break
+          end
+        elsif (block[i1 + 1] & 0xff) > (block[i2 + 1] & 0xff)
+          next
+        else
+          break
+        end
+      end
+    end
+
+    while (hp -= 1) >= 0
+      h = RBzip2::INCS[hp]
+      mj = lo + h - 1
+
+      i = lo + h
+      while i <= hi
+        k = 3
+        while i <= hi && (k -= 1) >= 0
+          v = fmap[i]
+          vd = v + d
+          j = i
+
+          once_runned = false
+
+          hammer_loop.call
+
+          fmap[j] = v
+
+          i += 1
+        end
+      end
+
+      break if first_attempt_shadow && i <= hi && work_done_shadow > work_limit_shadow
+    end
+
+    @work_done = work_done_shadow
+
+    first_attempt_shadow && (work_done_shadow > work_limit_shadow)
   end
 
   def move_to_front_code_and_send
@@ -533,6 +812,36 @@ class RBzip2::Compressor
     w 8, (u >> 16) & 0xff
     w 8, (u >> 8) & 0xff
     w 8, u & 0xff
+  end
+
+  def randomize_block
+    in_use      = @data.in_use
+    block       = @data.block
+    last_shadow = @last
+
+    256.times { |i| in_use[i] = false }
+
+    r_n_to_go = 0
+    r_t_pos = 0
+    j = 1
+    i = 0
+    while i <= last_shadow
+      i = j
+
+      if r_n_to_go == 0
+        r_n_to_go = RBzip2::RNUMS[r_t_pos]
+        r_t_pos = 0 if (r_t_pos += 1) == 512
+      end
+
+      r_n_to_go -= 1
+      block[j] ^= r_n_to_go == 1 ? 1 : 0
+
+      in_use[block[j] & 0xff] = true
+
+      j += 1
+    end
+
+    @block_randomized = true
   end
 
   def send_mtf_values
@@ -973,7 +1282,7 @@ class RBzip2::Compressor
           data_shadow.block[last_shadow + 3] = ch
           @last = last_shadow + 2
 
-        when 3:
+        when 3
           block = data_shadow.block
           block[last_shadow + 2] = ch
           block[last_shadow + 3] = ch

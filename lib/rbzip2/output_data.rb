@@ -13,12 +13,13 @@ class RBzip2::OutputData
               :send_mtf_values_code, :send_mtf_values_cost,
               :send_mtf_values_fave, :send_mtf_values_len,
               :send_mtf_values_rfreq, :send_mtf_values2_pos,
-              :send_mtf_values4_in_use_16, :sfmap, :unseq_to_seq, :weight
+              :send_mtf_values4_in_use_16, :sfmap, :stack_dd, :stack_hh,
+              :stack_ll, :unseq_to_seq, :weight
 
   def initialize(block_size)
     n = block_size * RBzip2::BASEBLOCKSIZE
-    @block        = Array.new n + 1 + RBzip2::NUM_OVERSHOOT_BYTES
-    @fmap         = Array.new n
+    @block        = Array.new n + 1 + RBzip2::NUM_OVERSHOOT_BYTES, 0
+    @fmap         = Array.new n, 0
     @selector     = Array.new RBzip2::MAX_SELECTORS
     @selector_mtf = Array.new RBzip2::MAX_SELECTORS
     @sfmap        = Array.new 2 * n
@@ -39,6 +40,10 @@ class RBzip2::OutputData
     RBzip2::N_GROUPS.times { |i| @send_mtf_values_rfreq[i] = Array.new RBzip2::MAX_ALPHA_SIZE, 0 }
     @send_mtf_values2_pos   = Array.new RBzip2::N_GROUPS
     @send_mtf_values4_in_use_16 = Array.new 16
+
+    @stack_dd = Array.new RBzip2::QSORT_STACK_SIZE
+    @stack_hh = Array.new RBzip2::QSORT_STACK_SIZE
+    @stack_ll = Array.new RBzip2::QSORT_STACK_SIZE
 
     @main_sort_big_done      = Array.new 256
     @main_sort_copy          = Array.new 256
