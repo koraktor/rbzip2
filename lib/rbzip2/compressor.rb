@@ -3,9 +3,9 @@
 #
 # Copyright (c) 2011, Sebastian Staudt
 
-require 'rbzip2/constants'
-
 class RBzip2::Compressor
+
+  include RBzip2::Constants
 
   def self.assign_codes(code, length, min_len, max_len, alpha_size)
     vec = 0
@@ -21,7 +21,7 @@ class RBzip2::Compressor
   end
 
   def self.choose_block_size(input_length)
-    input_length > 0 ? [(input_length / 132000) + 1, 9].min : RBzip2::MAX_BLOCK_SIZE
+    input_length > 0 ? [(input_length / 132000) + 1, 9].min : MAX_BLOCK_SIZE
   end
 
   def self.make_code_lengths(len, freq, data, alpha_size, max_len)
@@ -170,7 +170,7 @@ class RBzip2::Compressor
 
   attr_reader :block_size
 
-  def initialize(io, block_size = RBzip2::MAX_BLOCK_SIZE)
+  def initialize(io, block_size = MAX_BLOCK_SIZE)
     @allowable_block_size = 0
     @block_size           = block_size
     @buff                 = 0
@@ -186,7 +186,7 @@ class RBzip2::Compressor
   end
 
   def block_sort
-    @work_limit = RBzip2::WORK_FACTOR * @last
+    @work_limit = WORK_FACTOR * @last
     @work_done = 0
     @block_randomised = false
     @first_attempt = true
@@ -328,11 +328,11 @@ class RBzip2::Compressor
           z_pend -= 1
           loop do
             if (z_pend & 1) == 0
-              sfmap[wr] = RBzip2::RUNA
-              mtf_freq[RBzip2::RUNA] += 1
+              sfmap[wr] = RUNA
+              mtf_freq[RUNA] += 1
             else
-              sfmap[wr] = RBzip2::RUNB
-              mtf_freq[RBzip2::RUNB] += 1
+              sfmap[wr] = RUNB
+              mtf_freq[RUNB] += 1
             end
             wr += 1
 
@@ -352,11 +352,11 @@ class RBzip2::Compressor
       z_pend -= 1
       loop do
         if (z_pend & 1) == 0
-          sfmap[wr] = RBzip2::RUNA
-          mtf_freq[RBzip2::RUNA] += 1
+          sfmap[wr] = RUNA
+          mtf_freq[RUNA] += 1
         else
-          sfmap[wr] = RBzip2::RUNB
-          mtf_freq[RBzip2::RUNB] += 1
+          sfmap[wr] = RUNB
+          mtf_freq[RUNB] += 1
         end
         wr += 1
 
@@ -391,7 +391,7 @@ class RBzip2::Compressor
     in_use = @data.in_use
     in_use[0, 256] = [false] * 256
 
-    @allowable_block_size = (@block_size * RBzip2::BASEBLOCKSIZE) - 20
+    @allowable_block_size = (@block_size * BASEBLOCKSIZE) - 20
   end
 
   def main_sort
@@ -409,10 +409,10 @@ class RBzip2::Compressor
 
     65537.times { |i| ftab[i] = 0 }
 
-    RBzip2::NUM_OVERSHOOT_BYTES.times do |i|
+    NUM_OVERSHOOT_BYTES.times do |i|
       block[last_shadow + i + 2] = block[(i % (last_shadow + 1)) + 1]
     end
-    (last_shadow + RBzip2::NUM_OVERSHOOT_BYTES).times do |i|
+    (last_shadow + NUM_OVERSHOOT_BYTES).times do |i|
       quadrant[i] = 0
     end
     block[0] = block[last_shadow + 1]
@@ -467,21 +467,21 @@ class RBzip2::Compressor
       256.times do |j|
         sb = (ss << 8) + j
         ftab_sb = ftab[sb]
-        if (ftab_sb & RBzip2::SETMASK) != RBzip2::SETMASK
-          lo = ftab_sb & RBzip2::CLEARMASK
-          hi = (ftab[sb + 1] & RBzip2::CLEARMASK) - 1
+        if (ftab_sb & SETMASK) != SETMASK
+          lo = ftab_sb & CLEARMASK
+          hi = (ftab[sb + 1] & CLEARMASK) - 1
           if hi > lo
             main_qsort3 data_shadow, lo, hi, 2
             return if first_attempt_shadow && (@work_done > work_limit_shadow)
           end
-          ftab[sb] = ftab_sb | RBzip2::SETMASK
+          ftab[sb] = ftab_sb | SETMASK
         end
       end
 
-      256.times { |j| copy[j] = ftab[(j << 8) + ss] & RBzip2::CLEARMASK }
+      256.times { |j| copy[j] = ftab[(j << 8) + ss] & CLEARMASK }
 
-      hj = ftab[(ss + 1) << 8] & RBzip2::CLEARMASK
-      (ftab[ss << 8] & RBzip2::CLEARMASK).upto(hj - 1) do |j|
+      hj = ftab[(ss + 1) << 8] & CLEARMASK
+      (ftab[ss << 8] & CLEARMASK).upto(hj - 1) do |j|
         fmap_j = fmap[j]
         c1 = block[fmap_j] & 0xff
         if !big_done[c1]
@@ -490,13 +490,13 @@ class RBzip2::Compressor
         end
       end
 
-      255.downto(0) { |j| ftab[(j << 8) + ss] |= RBzip2::SETMASK }
+      255.downto(0) { |j| ftab[(j << 8) + ss] |= SETMASK }
 
       big_done[ss] = true
 
       if i < 255
-        bb_start = ftab[ss << 8] & RBzip2::CLEARMASK
-        bb_size = (ftab[(ss + 1) << 8] & RBzip2::CLEARMASK) - bb_start
+        bb_start = ftab[ss << 8] & CLEARMASK
+        bb_size = (ftab[(ss + 1) << 8] & CLEARMASK) - bb_start
         shifts = 0
 
         while (bb_size >> shifts) > 65534
@@ -507,7 +507,7 @@ class RBzip2::Compressor
           a2update = fmap[bb_start + j]
           q_val = j >> shifts
           quadrant[a2update] = q_val
-          if a2update < RBzip2::NUM_OVERSHOOT_BYTES
+          if a2update < NUM_OVERSHOOT_BYTES
             quadrant[a2update + last_shadow + 1] = q_val
           end
         end
@@ -532,7 +532,7 @@ class RBzip2::Compressor
       hi = stack_hh[sp]
       d  = stack_dd[sp]
 
-      if (hi - lo < RBzip2::SMALL_THRESH) || (d > RBzip2::DEPTH_THRESH)
+      if (hi - lo < SMALL_THRESH) || (d > DEPTH_THRESH)
         return if main_simple_sort data_shadow, lo, hi, d
       else
         d1 = d + 1
@@ -623,7 +623,7 @@ class RBzip2::Compressor
     return @first_attempt && (@work_done > @work_limit) if big_n < 2
 
     hp = 0
-    while RBzip2::INCS[hp] < big_n
+    while INCS[hp] < big_n
       hp += 1
     end
 
@@ -767,7 +767,7 @@ class RBzip2::Compressor
     end
 
     while (hp -= 1) >= 0
-      h = RBzip2::INCS[hp]
+      h = INCS[hp]
       mj = lo + h - 1
 
       i = lo + h
@@ -829,7 +829,7 @@ class RBzip2::Compressor
       i = j
 
       if r_n_to_go == 0
-        r_n_to_go = RBzip2::RNUMS[r_t_pos]
+        r_n_to_go = RNUMS[r_t_pos]
         r_t_pos = 0 if (r_t_pos += 1) == 512
       end
 
@@ -848,9 +848,9 @@ class RBzip2::Compressor
     len = @data.send_mtf_values_len
     alpha_size = @n_in_use + 2
 
-    RBzip2::N_GROUPS.times do |t|
+    N_GROUPS.times do |t|
       len_t = len[t]
-      alpha_size.times { |v| len_t[v] = RBzip2::GREATER_ICOST }
+      alpha_size.times { |v| len_t[v] = GREATER_ICOST }
     end
 
     n_groups = (@n_mtf < 200) ? 2 : (@n_mtf < 600) ? 3 : (@n_mtf < 1200) ? 4 :
@@ -893,9 +893,9 @@ class RBzip2::Compressor
       len_np = len[n_part - 1]
       (alpha_size - 1).downto(0) do |v|
         if v >= gs && v <= ge
-          len_np[v] = RBzip2::LESSER_ICOST
+          len_np[v] = LESSER_ICOST
         else
-          len_np[v] = RBzip2::GREATER_ICOST
+          len_np[v] = GREATER_ICOST
         end
       end
 
@@ -921,7 +921,7 @@ class RBzip2::Compressor
     n_mtf_shadow = @n_mtf
     n_selectors = 0
 
-    RBzip2::N_ITERS.times do
+    N_ITERS.times do
       (n_groups - 1).downto(0) do |t|
         fave[t] = 0
         rfreqt = rfreq[t]
@@ -932,9 +932,9 @@ class RBzip2::Compressor
 
       gs = 0
       while gs < @n_mtf
-        ge = [gs + RBzip2::G_SIZE - 1, n_mtf_shadow - 1].min
+        ge = [gs + G_SIZE - 1, n_mtf_shadow - 1].min
 
-        if n_groups == RBzip2::N_GROUPS
+        if n_groups == N_GROUPS
           cost0 = 0
           cost1 = 0
           cost2 = 0
@@ -1188,7 +1188,7 @@ class RBzip2::Compressor
 
     gs = 0
     while gs < n_mtf_shadow
-      ge = [gs + RBzip2::G_SIZE - 1, n_mtf_shadow - 1].min
+      ge = [gs + G_SIZE - 1, n_mtf_shadow - 1].min
       selector_sel_ctr = selector[sel_ctr] & 0xff
       code_sel_ctr = code[selector_sel_ctr]
       len_sel_ctr = len[selector_sel_ctr]

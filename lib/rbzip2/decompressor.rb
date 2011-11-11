@@ -5,9 +5,9 @@
 
 require 'stringio'
 
-require 'rbzip2/constants'
-
 class RBzip2::Decompressor
+
+  include RBzip2::Constants
 
   def initialize(io)
     @buff = 0
@@ -57,24 +57,24 @@ class RBzip2::Decompressor
     ret_char = @current_char
 
     case @current_state
-      when RBzip2::EOF
+      when EOF
         return -1
 
-      when RBzip2::RAND_PART_B_STATE
+      when RAND_PART_B_STATE
         setup_rand_part_b
 
-      when RBzip2::RAND_PART_C_STATE
+      when RAND_PART_C_STATE
         setup_rand_part_c
 
-      when RBzip2::NO_RAND_PART_B_STATE
+      when NO_RAND_PART_B_STATE
         setup_no_rand_part_b
 
-      when RBzip2::NO_RAND_PART_C_STATE
+      when NO_RAND_PART_C_STATE
         setup_no_rand_part_c
 
-      when RBzip2::START_BLOCK_STATE
-      when RBzip2::RAND_PART_A_STATE
-      when RBzip2::NO_RAND_PART_A_STATE
+      when START_BLOCK_STATE
+      when RAND_PART_A_STATE
+      when NO_RAND_PART_A_STATE
       else
         raise 'illegal state'
     end
@@ -119,7 +119,7 @@ class RBzip2::Decompressor
     if magic == [0x17, 0x72, 0x45, 0x38, 0x50, 0x90]
       complete
     elsif magic != [0x31, 0x41, 0x59, 0x26, 0x53, 0x59]
-      @current_state = RBzip2::EOF
+      @current_state = EOF
 
       raise 'Bad block header.'
     else
@@ -131,7 +131,7 @@ class RBzip2::Decompressor
       get_and_move_to_front_decode
 
       @crc.initialize_crc
-      @current_state = RBzip2::START_BLOCK_STATE
+      @current_state = START_BLOCK_STATE
     end
   end
 
@@ -151,7 +151,7 @@ class RBzip2::Decompressor
 
   def complete
     @stored_combined_crc = int
-    @current_state = RBzip2::EOF
+    @current_state = EOF
     @data = nil
 
     raise 'BZip2 CRC error' if @stored_combined_crc != @computed_combined_crc
@@ -209,7 +209,7 @@ class RBzip2::Decompressor
       end
     end
 
-    RBzip2::MAX_CODE_LEN.downto 1 do |i|
+    MAX_CODE_LEN.downto 1 do |i|
       base[i] = 0
       limit[i] = 0
     end
@@ -219,7 +219,7 @@ class RBzip2::Decompressor
     end
 
     b = 0
-    1.upto(RBzip2::MAX_CODE_LEN - 1) do |i|
+    1.upto(MAX_CODE_LEN - 1) do |i|
       b += base[i]
       base[i] = b
     end
@@ -347,7 +347,7 @@ class RBzip2::Decompressor
     limit = @data.limit
     base = @data.base
     perm = @data.perm
-    limit_last = @block_size * RBzip2::BASEBLOCKSIZE
+    limit_last = @block_size * BASEBLOCKSIZE
 
     256.downto(0) do |i|
       yy[i] = i
@@ -355,7 +355,7 @@ class RBzip2::Decompressor
     end
 
     group_no = 0
-    group_pos = RBzip2::G_SIZE - 1
+    group_pos = G_SIZE - 1
     eob = @n_in_use + 1
     next_sym = get_and_move_to_front_decode0 0
     buff_shadow = @buff
@@ -368,21 +368,21 @@ class RBzip2::Decompressor
     min_lens_zt = min_lens[zt]
 
     while next_sym != eob
-      if (next_sym == RBzip2::RUNA) || (next_sym == RBzip2::RUNB)
+      if (next_sym == RUNA) || (next_sym == RUNB)
         s = -1
 
         n = 1
         loop do
-          if next_sym == RBzip2::RUNA
+          if next_sym == RUNA
             s += n
-          elsif next_sym == RBzip2::RUNB
+          elsif next_sym == RUNB
             s += n << 1
           else
             break
           end
 
           if group_pos == 0
-            group_pos = RBzip2::G_SIZE - 1
+            group_pos = G_SIZE - 1
             group_no += 1
             zt = selector[group_no] & 0xff
             base_zt = base[zt]
@@ -450,7 +450,7 @@ class RBzip2::Decompressor
         yy[0] = tmp
 
         if group_pos == 0
-          group_pos = RBzip2::G_SIZE - 1
+          group_pos = G_SIZE - 1
           group_no += 1
           zt = selector[group_no] & 0xff
           base_zt = base[zt]
@@ -573,7 +573,7 @@ class RBzip2::Decompressor
       @su_t_pos = @data.tt[@su_t_pos]
 
       if @su_r_n_to_go == 0
-        @su_r_n_to_go = RBzip2::RNUMS[@su_r_t_pos] - 1
+        @su_r_n_to_go = RNUMS[@su_r_t_pos] - 1
         @su_r_t_pos += 1
         @su_r_t_pos = 0 if @su_r_t_pos == 512
       else
@@ -583,7 +583,7 @@ class RBzip2::Decompressor
       @su_ch2 = su_ch2_shadow ^= (@su_r_n_to_go == 1) ? 1 : 0
       @su_i2 += 1
       @current_char = su_ch2_shadow
-      @current_state = RBzip2::RAND_PART_B_STATE
+      @current_state = RAND_PART_B_STATE
       @crc.update_crc su_ch2_shadow
     else
       end_block
@@ -600,10 +600,10 @@ class RBzip2::Decompressor
       @su_t_pos = @data.tt[@su_t_pos]
       @su_i2 += 1
       @current_char = su_ch2_shadow
-      @current_state = RBzip2::NO_RAND_PART_B_STATE
+      @current_state = NO_RAND_PART_B_STATE
       @crc.update_crc su_ch2_shadow
     else
-      @current_state = RBzip2::NO_RAND_PART_A_STATE
+      @current_state = NO_RAND_PART_A_STATE
       end_block
       init_block
       setup_block
@@ -612,7 +612,7 @@ class RBzip2::Decompressor
 
   def setup_rand_part_b
     if @su_ch2 != @su_ch_prev
-      @current_state = RBzip2::RAND_PART_A_STATE
+      @current_state = RAND_PART_A_STATE
       @su_count = 1
       setup_rand_part_a
     else
@@ -622,7 +622,7 @@ class RBzip2::Decompressor
         @su_t_pos = @data.tt[@su_t_pos]
 
         if @su_r_n_to_go == 0
-          @su_r_n_to_go = RBzip2::RNUMS[@su_r_t_pos] - 1
+          @su_r_n_to_go = RNUMS[@su_r_t_pos] - 1
           @su_r_t_pos += 1
           @su_r_t_pos = 0 if @su_r_t_pos == 512
         else
@@ -630,11 +630,11 @@ class RBzip2::Decompressor
         end
 
         @su_j2 = 0
-        @current_state = RBzip2::RAND_PART_C_STATE
+        @current_state = RAND_PART_C_STATE
         @su_z ^= 1 if @su_r_n_to_go == 1
         setup_rand_part_c
       else
-        @current_state = RBzip2::RAND_PART_A_STATE
+        @current_state = RAND_PART_A_STATE
         setup_rand_part_a
       end
     end
@@ -646,7 +646,7 @@ class RBzip2::Decompressor
       @crc.update_crc @su_ch2
       @su_j2 += 1
     else
-      @current_state = RBzip2::RAND_PART_A_STATE
+      @current_state = RAND_PART_A_STATE
       @su_i2 += 1
       @su_count = 0
       setup_rand_part_a
@@ -676,7 +676,7 @@ class RBzip2::Decompressor
       @current_char = su_ch2_shadow
       @crc.update_crc su_ch2_shadow
       @su_j2 += 1
-      @current_state = RBzip2::NO_RAND_PART_C_STATE
+      @current_state = NO_RAND_PART_C_STATE
     else
       @su_i2 += 1
       @su_count = 0

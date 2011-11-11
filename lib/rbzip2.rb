@@ -7,6 +7,7 @@ module RBzip2
 
   autoload :CRC,          'rbzip2/crc'
   autoload :Compressor,   'rbzip2/compressor'
+  autoload :Constants,    'rbzip2/constants'
   autoload :Decompressor, 'rbzip2/decompressor'
   autoload :IO,           'rbzip2/io'
   autoload :InputData,    'rbzip2/input_data'

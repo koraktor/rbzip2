@@ -3,7 +3,7 @@
 #
 # Copyright (c) 2011, Sebastian Staudt
 
-module RBzip2
+module RBzip2::Constants
 
   BASEBLOCKSIZE = 100000
   MAX_ALPHA_SIZE = 258
