@@ -30,4 +30,12 @@ describe RBzip2::Decompressor do
     @bz2_decompressor.read.should eq(@txt_file.read)
   end
 
+  it 'should be able to decompress large compressed data' do
+    txt_file = File.new File.join(File.dirname(__FILE__), 'fixtures/big_test.txt')
+    bz2_file  = File.new File.join(File.dirname(__FILE__), 'fixtures/big_test.bz2')
+    @bz2_decompressor = RBzip2::Decompressor.new bz2_file
+
+    @bz2_decompressor.read.should eq(txt_file.read)
+  end
+
 end
