@@ -168,7 +168,7 @@ class RBzip2::Decompressor
 
     if live_shadow < n
       begin
-        thech = @io.read(1)[0].ord
+        thech = @io.readbyte
 
         raise 'unexpected end of stream' if thech < 0
 
@@ -394,7 +394,7 @@ class RBzip2::Decompressor
           zn = min_lens_zt
 
           while live_shadow < zn
-            thech = @io.read(1)[0].ord
+            thech = @io.readbyte
 
             raise 'unexpected end of stream' if thech < 0
 
@@ -409,7 +409,7 @@ class RBzip2::Decompressor
             zn += 1
 
             while live_shadow < 1
-              thech = @io.read(1)[0].ord
+              thech = @io.readbyte
 
               raise 'unexpected end of stream' if thech < 0
 
@@ -462,7 +462,7 @@ class RBzip2::Decompressor
         zn = min_lens_zt
 
         while live_shadow < zn
-          thech = @io.read(1)[0].ord
+          thech = @io.readbyte
 
           raise 'unexpected end of stream' if thech < 0
 
@@ -475,7 +475,7 @@ class RBzip2::Decompressor
         while zvec > limit_zt[zn]
           zn += 1
           while live_shadow < 1
-            thech = @io.read(1)[0].ord
+            thech = @io.readbyte
 
             raise 'unexpected end of stream' if thech < 0
 
@@ -507,7 +507,7 @@ class RBzip2::Decompressor
       zn += 1
 
       while live_shadow < 1
-        thech = @io.read(1)[0].ord
+        thech = @io.readbyte
 
         raise 'unexpected end of stream' if thech < 0
 
