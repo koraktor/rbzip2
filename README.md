@@ -55,7 +55,7 @@ To use it as a dependency managed by Bundler add the following to your
 Due to its pure Ruby implementation RBzip2 is inherently slower than
 bzip2-ruby, which is a Ruby binding to libbzip2. Currently, RBzip2 is a plain
 port of Apache Commons' Java code to Ruby and no effort has been made to
-optimize it. That's why RBzip2 is slower by a factor of about 140/1000 while
+optimize it. That's why RBzip2 is slower by a factor of about 130/100 while
 compressing/decompressing (on Ruby 1.9.3). Ruby 1.8.7 is even slower.
 
 ## License
