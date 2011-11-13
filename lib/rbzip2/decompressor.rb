@@ -36,7 +36,7 @@ class RBzip2::Decompressor
     else
       r = StringIO.new
       if length == nil
-        loop do
+        while true do
           b = read0
           break if b < 0
           r.write b.chr
@@ -372,7 +372,7 @@ class RBzip2::Decompressor
         s = -1
 
         n = 1
-        loop do
+        while true do
           if next_sym == RUNA
             s += n
           elsif next_sym == RUNB

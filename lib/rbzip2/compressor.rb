@@ -67,7 +67,7 @@ class RBzip2::Compressor
         zz  = 1
         tmp = heap[1]
 
-        loop do
+        while true do
           yy = zz << 1
 
           break if yy > n_heap
@@ -90,7 +90,7 @@ class RBzip2::Compressor
         zz = 1
         tmp = heap[1]
 
-        loop do
+        while true do
           yy = zz << 1
 
           break if yy > n_heap
@@ -326,7 +326,7 @@ class RBzip2::Compressor
       else
         if z_pend > 0
           z_pend -= 1
-          loop do
+          while true do
             if (z_pend & 1) == 0
               sfmap[wr] = RUNA
               mtf_freq[RUNA] += 1
@@ -350,7 +350,7 @@ class RBzip2::Compressor
 
     if z_pend > 0
       z_pend -= 1
-      loop do
+      while true do
         if (z_pend & 1) == 0
           sfmap[wr] = RUNA
           mtf_freq[RUNA] += 1
