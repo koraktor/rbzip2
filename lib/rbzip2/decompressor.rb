@@ -398,11 +398,11 @@ class RBzip2::Decompressor
 
             raise 'unexpected end of stream' if thech < 0
 
-            buff_shadow = (buff_shadow << 8) | thech
+            buff_shadow = ((buff_shadow << 8) & 0xffffffff) | thech
             live_shadow += 8
           end
 
-          zvec = (buff_shadow >> (live_shadow - zn)) & ((1 << zn) - 1)
+          zvec = ((buff_shadow >> (live_shadow - zn)) & 0xffffffff) & ((1 << zn) - 1)
           live_shadow -= zn
 
           while zvec > limit_zt[zn]
@@ -413,7 +413,7 @@ class RBzip2::Decompressor
 
               raise 'unexpected end of stream' if thech < 0
 
-              buff_shadow = (buff_shadow << 8) | thech
+              buff_shadow = ((buff_shadow << 8) & 0xffffffff) | thech
               live_shadow += 8
             end
 
@@ -466,7 +466,7 @@ class RBzip2::Decompressor
 
           raise 'unexpected end of stream' if thech < 0
 
-          buff_shadow = (buff_shadow << 8) | thech
+          buff_shadow = ((buff_shadow << 8) & 0xffffffff) | thech
           live_shadow += 8
         end
         zvec = (buff_shadow >> (live_shadow - zn)) & ((1 << zn) - 1)
@@ -479,7 +479,7 @@ class RBzip2::Decompressor
 
             raise 'unexpected end of stream' if thech < 0
 
-            buff_shadow = (buff_shadow << 8) | thech
+            buff_shadow = ((buff_shadow << 8) & 0xffffffff) | thech
             live_shadow += 8
           end
           live_shadow -= 1
@@ -511,7 +511,7 @@ class RBzip2::Decompressor
 
         raise 'unexpected end of stream' if thech < 0
 
-        buff_shadow = (buff_shadow << 8) | thech
+        buff_shadow = ((buff_shadow << 8) & 0xffffffff) | thech
         live_shadow += 8
       end
 
