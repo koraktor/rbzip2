@@ -3,6 +3,8 @@
 #
 # Copyright (c) 2011, Sebastian Staudt
 
+require 'core_ext/file'
+
 class RBzip2::Decompressor
 
   include RBzip2::Constants
