@@ -3,8 +3,6 @@
 #
 # Copyright (c) 2011, Sebastian Staudt
 
-require 'stringio'
-
 class RBzip2::Decompressor
 
   include RBzip2::Constants
@@ -34,22 +32,22 @@ class RBzip2::Decompressor
       count (r < 0 ? -1 : 1)
       r
     else
-      r = StringIO.new
+      r = ''
       if length == nil
         while true do
           b = read0
           break if b < 0
-          r.write b.chr
+          r << b.chr
         end
       elsif length > 0
         length.times do
           b = read0
           break if b < 0
-          r.write b.chr
+          r << b.chr
         end
         count r.size
       end
-      r.string
+      r
     end
   end
 
