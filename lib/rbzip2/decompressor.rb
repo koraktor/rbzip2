@@ -84,9 +84,9 @@ class RBzip2::Decompressor
 
   def make_maps
     in_use = @data.in_use
-    seq_to_unseq = @data.seq_to_unseq;
+    seq_to_unseq = @data.seq_to_unseq
 
-    n_in_use_shadow = 0;
+    n_in_use_shadow = 0
 
     256.times do |i|
       if in_use[i]
@@ -95,7 +95,7 @@ class RBzip2::Decompressor
       end
     end
 
-    @n_in_use = n_in_use_shadow;
+    @n_in_use = n_in_use_shadow
   end
 
   def init
