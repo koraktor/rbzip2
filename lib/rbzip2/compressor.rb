@@ -1270,7 +1270,7 @@ class RBzip2::Compressor
       ch = current_char_shadow
 
       run_length_shadow = @run_length
-      @crc.update_crc current_char_shadow, run_length_shadow
+      run_length_shadow.times { @crc.update_crc current_char_shadow }
 
       case run_length_shadow
         when 1
