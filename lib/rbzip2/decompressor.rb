@@ -3,7 +3,7 @@
 #
 # Copyright (c) 2011, Sebastian Staudt
 
-require 'core_ext/file'
+require 'core_ext/io'
 
 class RBzip2::Decompressor
 

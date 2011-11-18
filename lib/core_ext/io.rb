@@ -3,9 +3,9 @@
 #
 # Copyright (c) 2011, Sebastian Staudt
 
-unless File.respond_to? :readbyte
+unless IO.method_defined? :readbyte
 
-  class File
+  module IO
 
     def readbyte
       read(1)[0].ord
