@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec-expectations', '~> 2.7.0'
   s.add_development_dependency 'yard', '~> 0.7.3'
 
-  s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- spec/*`.split("\n")
+  s.files         = Dir['{lib}/**/*.rb', 'LICENSE', 'Rakefile', 'README.md']
+  s.test_files    = Dir['{spec}/**/*_spec.rb']
   s.require_paths = [ 'lib' ]
 end
