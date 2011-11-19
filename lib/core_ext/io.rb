@@ -5,7 +5,7 @@
 
 unless IO.method_defined? :readbyte
 
-  module IO
+  class IO
 
     def readbyte
       read(1)[0].ord
