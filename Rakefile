@@ -9,6 +9,7 @@ require 'rspec/core/rake_task'
 require 'rubygems/package_task'
 
 task :default => :spec
+task :test    => :spec
 
 spec = Gem::Specification.load 'rbzip2.gemspec'
 Gem::PackageTask.new(spec) do |pkg|
