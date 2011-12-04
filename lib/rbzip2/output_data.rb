@@ -30,14 +30,11 @@ class RBzip2::OutputData
     @unseq_to_seq = Array.new 256
 
     @generate_mtf_values_yy = Array.new 256
-    @send_mtf_values_code   = Array.new N_GROUPS
-    N_GROUPS.times { |i| @send_mtf_values_code[i] = Array.new MAX_ALPHA_SIZE }
+    @send_mtf_values_code   = Array.new(N_GROUPS) { Array.new MAX_ALPHA_SIZE }
     @send_mtf_values_cost   = Array.new N_GROUPS
     @send_mtf_values_fave   = Array.new N_GROUPS
-    @send_mtf_values_len    = Array.new N_GROUPS
-    N_GROUPS.times { |i| @send_mtf_values_len[i] = Array.new MAX_ALPHA_SIZE }
-    @send_mtf_values_rfreq  = Array.new N_GROUPS
-    N_GROUPS.times { |i| @send_mtf_values_rfreq[i] = Array.new MAX_ALPHA_SIZE, 0 }
+    @send_mtf_values_len    = Array.new(N_GROUPS) { Array.new MAX_ALPHA_SIZE }
+    @send_mtf_values_rfreq  = Array.new(N_GROUPS) { Array.new MAX_ALPHA_SIZE }
     @send_mtf_values2_pos   = Array.new N_GROUPS
     @send_mtf_values4_in_use_16 = Array.new 16
 

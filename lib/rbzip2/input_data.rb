@@ -21,31 +21,22 @@ class RBzip2::InputData
 
     @unzftab = Array.new 256, 0
 
-    @base = Array.new N_GROUPS
-    N_GROUPS.times { |i| @base[i] = Array.new(MAX_ALPHA_SIZE, 0) }
-    @limit = Array.new N_GROUPS
-    N_GROUPS.times { |i| @limit[i] = Array.new(MAX_ALPHA_SIZE, 0) }
-    @perm = Array.new N_GROUPS
-     N_GROUPS.times { |i| @perm[i] = Array.new(MAX_ALPHA_SIZE, 0) }
+    @base = Array.new(N_GROUPS) { Array.new(MAX_ALPHA_SIZE, 0) }
+    @limit = Array.new(N_GROUPS) { Array.new(MAX_ALPHA_SIZE, 0) }
+    @perm = Array.new(N_GROUPS) { Array.new(MAX_ALPHA_SIZE, 0) }
     @min_lens = Array.new N_GROUPS, 0
 
     @cftab = Array.new 257, 0
     @get_and_move_to_front_decode_yy = Array.new 256
-    @temp_char_array_2d = Array.new N_GROUPS
-    N_GROUPS.times { |i| @temp_char_array_2d[i] = Array.new(MAX_ALPHA_SIZE, 0) }
+    @temp_char_array_2d = Array.new(N_GROUPS) { Array.new(MAX_ALPHA_SIZE, 0) }
     @receive_decoding_tables_pos = Array.new N_GROUPS, 0
 
     @ll8 = Array.new block_size * BASEBLOCKSIZE
   end
 
   def init_tt(size)
-    tt_shadow = @tt
-
-    if tt_shadow.nil? || tt_shadow.size < size
-      @tt = tt_shadow = Array.new(size)
-    end
-
-    tt_shadow
+    @tt = Array.new(size) if @tt.nil? || @tt.size < size
+    @tt
   end
 
 end
