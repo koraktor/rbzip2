@@ -56,27 +56,18 @@ class RBzip2::Decompressor
   def read0
     ret_char = @current_char
 
-    case @current_state
-      when EOF
-        return -1
-
-      when RAND_PART_B_STATE
-        setup_rand_part_b
-
-      when RAND_PART_C_STATE
-        setup_rand_part_c
-
-      when NO_RAND_PART_B_STATE
-        setup_no_rand_part_b
-
-      when NO_RAND_PART_C_STATE
-        setup_no_rand_part_c
-
-      when START_BLOCK_STATE
-      when RAND_PART_A_STATE
-      when NO_RAND_PART_A_STATE
-      else
-        raise 'illegal state'
+    if @current_state == RAND_PART_B_STATE
+      setup_rand_part_b
+    elsif @current_state == NO_RAND_PART_B_STATE
+      setup_no_rand_part_b
+    elsif @current_state == RAND_PART_C_STATE
+      setup_rand_part_c
+    elsif @current_state == NO_RAND_PART_C_STATE
+      setup_no_rand_part_c
+    elsif @current_state == EOF
+      return -1
+    else
+      raise 'illegal state'
     end
 
     ret_char
