@@ -1,9 +1,9 @@
 # This code is free software; you can redistribute it and/or modify it under
 # the terms of the new BSD License.
 #
-# Copyright (c) 2011, Sebastian Staudt
+# Copyright (c) 2011-2013, Sebastian Staudt
 
-class RBzip2::CRC
+class RBzip2::Ruby::CRC
 
   CRC32_TABLE = [
     0x00000000, 0x04c11db7, 0x09823b6e, 0x0d4326d9, 0x130476dc, 0x17c56b6b,

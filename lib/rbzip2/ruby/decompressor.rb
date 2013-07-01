@@ -1,19 +1,19 @@
 # This code is free software; you can redistribute it and/or modify it under
 # the terms of the new BSD License.
 #
-# Copyright (c) 2011, Sebastian Staudt
+# Copyright (c) 2011-2013, Sebastian Staudt
 
 require 'core_ext/io'
 
-class RBzip2::Decompressor
+class RBzip2::Ruby::Decompressor
 
-  include RBzip2::Constants
+  include RBzip2::Ruby::Constants
 
   def initialize(io)
     @buff = 0
     @bytes_read = 0
     @computed_combined_crc = 0
-    @crc = RBzip2::CRC.new
+    @crc = RBzip2::Ruby::CRC.new
     @current_char = -1
     @io = io
     @live = 0
@@ -117,7 +117,7 @@ class RBzip2::Decompressor
       @stored_block_crc = int
       @block_randomised = bit
 
-      @data = RBzip2::InputData.new @block_size if @data.nil?
+      @data = RBzip2::Ruby::InputData.new @block_size if @data.nil?
 
       get_and_move_to_front_decode
 

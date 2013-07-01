@@ -1,11 +1,11 @@
 # This code is free software; you can redistribute it and/or modify it under
 # the terms of the new BSD License.
 #
-# Copyright (c) 2011, Sebastian Staudt
+# Copyright (c) 2011-2013, Sebastian Staudt
 
-class RBzip2::OutputData
+class RBzip2::Ruby::OutputData
 
-  include RBzip2::Constants
+  include RBzip2::Ruby::Constants
 
   attr_reader :block, :ftab, :fmap, :generate_mtf_values_yy, :heap, :in_use,
               :main_sort_big_done, :main_sort_copy, :main_sort_running_order,

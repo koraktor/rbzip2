@@ -1,11 +1,11 @@
 # This code is free software; you can redistribute it and/or modify it under
 # the terms of the new BSD License.
 #
-# Copyright (c) 2011, Sebastian Staudt
+# Copyright (c) 2011-2013, Sebastian Staudt
 
-class RBzip2::Compressor
+class RBzip2::Ruby::Compressor
 
-  include RBzip2::Constants
+  include RBzip2::Ruby::Constants
 
   def self.assign_codes(code, length, min_len, max_len, alpha_size)
     vec = 0
@@ -175,7 +175,7 @@ class RBzip2::Compressor
     @block_size           = block_size
     @buff                 = 0
     @combined_crc         = 0
-    @crc                  = RBzip2::CRC.new
+    @crc                  = RBzip2::Ruby::CRC.new
     @current_char         = -1
     @io                   = io
     @last                 = 0
@@ -375,7 +375,7 @@ class RBzip2::Compressor
     put_byte 0x42
     put_byte 0x5a
 
-    @data = RBzip2::OutputData.new @block_size
+    @data = RBzip2::Ruby::OutputData.new @block_size
 
     put_byte 0x68
     put_byte 0x30 + @block_size

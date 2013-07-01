@@ -1,11 +1,11 @@
 # This code is free software; you can redistribute it and/or modify it under
 # the terms of the new BSD License.
 #
-# Copyright (c) 2011, Sebastian Staudt
+# Copyright (c) 2011-2013, Sebastian Staudt
 
-class RBzip2::InputData
+class RBzip2::Ruby::InputData
 
-  include RBzip2::Constants
+  include RBzip2::Ruby::Constants
 
   attr_reader :base, :cftab, :get_and_move_to_front_decode_yy, :in_use,
               :limit, :ll8, :min_lens, :perm, :receive_decoding_tables_pos,

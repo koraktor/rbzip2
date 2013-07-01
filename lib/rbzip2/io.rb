@@ -1,16 +1,14 @@
 # This code is free software; you can redistribute it and/or modify it under
 # the terms of the new BSD License.
 #
-# Copyright (c) 2011, Sebastian Staudt
-
-require 'rbzip2/decompressor'
+# Copyright (c) 2011-2013, Sebastian Staudt
 
 class RBzip2::IO
 
   def initialize(io)
     @io           = io
-    @compressor   = Compressor.new io
-    @decompressor = Decompressor.new io
+    @compressor   = Ruby::Compressor.new io
+    @decompressor = Ruby::Decompressor.new io
   end
 
   def close
