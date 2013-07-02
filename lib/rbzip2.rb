@@ -5,6 +5,7 @@
 
 module RBzip2
 
+  autoload :FFI,     'rbzip2/ffi'
   autoload :IO,      'rbzip2/io'
   autoload :Ruby,    'rbzip2/ruby'
   autoload :VERSION, 'rbzip2/version'

@@ -1,7 +1,7 @@
 # This code is free software; you can redistribute it and/or modify it under
 # the terms of the new BSD License.
 #
-# Copyright (c) 2011, Sebastian Staudt
+# Copyright (c) 2011-2013, Sebastian Staudt
 
 require File.expand_path(File.dirname(__FILE__) + '/lib/rbzip2/version')
 
@@ -15,6 +15,7 @@ Gem::Specification.new do |s|
   s.summary     = 'Pure Ruby impementation of bzip2'
   s.description = 'A pure Ruby implementation of the bzip2 compression algorithm.'
 
+  s.add_development_dependency 'ffi', '~> 1.9.0'
   s.add_development_dependency 'mocha', '~> 0.10.0'
   s.add_development_dependency 'rake', '~> 0.9.2'
   s.add_development_dependency 'rspec-core', '~> 2.8.0'

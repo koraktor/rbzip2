@@ -1,19 +1,19 @@
 # This code is free software; you can redistribute it and/or modify it under
 # the terms of the new BSD License.
 #
-# Copyright (c) 2011-2013, Sebastian Staudt
+# Copyright (c) 2013, Sebastian Staudt
 
 require 'helper'
 
-describe RBzip2::Ruby::Compressor do
+describe RBzip2::FFI::Compressor do
 
   before do
     @io = StringIO.new
-    @bz2_compressor = RBzip2::Ruby::Compressor.new @io
+    @bz2_compressor = RBzip2::FFI::Compressor.new @io
   end
 
   it 'acts like a standard IO' do
-    methods = RBzip2::Ruby::Compressor.instance_methods.map { |m| m.to_sym }
+    methods = RBzip2::FFI::Compressor.instance_methods.map { |m| m.to_sym }
     methods.should include(:write, :close)
   end
 
@@ -28,12 +28,9 @@ describe RBzip2::Ruby::Compressor do
     @io.string.should eq_bz2
   end
 
-  # TODO
-  # Uses a different fixture because the implementation does produce a slightly
-  # different and bigger result
   it 'should be able to compress large raw data' do
     txt_file = fixture 'fixtures/big_test.txt'
-    bz2_file = fixture 'fixtures/big_test.ruby.bz2'
+    bz2_file  = fixture 'fixtures/big_test.bz2'
     @bz2_compressor.write txt_file.read
     @bz2_compressor.close
 
