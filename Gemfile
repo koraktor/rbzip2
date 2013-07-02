@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 group :development do
-  gem 'ffi', '~> 1.9.0'
+  gem 'ffi', '~> 1.9.0', :platform => :mri
   gem 'mocha', '~> 0.14.0'
   gem 'rake', '~> 10.1.0'
   gem 'rspec-core', '~> 2.13.1'
