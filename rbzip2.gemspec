@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rake', '~> 10.1.0'
   s.add_development_dependency 'rspec-core', '~> 2.13.1'
   s.add_development_dependency 'rspec-expectations', '~> 2.13.0'
-  s.add_development_dependency 'yard', '~> 0.7.3'
+  s.add_development_dependency 'yard', '~> 0.8.6'
 
   s.files         = Dir['{lib}/**/*.rb', 'LICENSE', 'Rakefile', 'README.md']
   s.test_files    = Dir['{spec}/**/*_spec.rb']
