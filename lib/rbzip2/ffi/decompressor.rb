@@ -21,7 +21,7 @@ class RBzip2::FFI::Decompressor
     out_len = data.bytesize * factor
     dst_buf = ::FFI::MemoryPointer.new :char, out_len
     dst_len = ::FFI::MemoryPointer.new :uint32
-    dst_len.write_uint32 out_len
+    dst_len.write_uint out_len
 
     src_buf = ::FFI::MemoryPointer.new :char, data.bytesize
     src_buf.put_bytes 0, data
@@ -31,7 +31,7 @@ class RBzip2::FFI::Decompressor
 
     case ret
       when RBzip2::FFI::BZ_OK
-        dst_buf.read_bytes dst_len.read_uint32
+        dst_buf.read_bytes dst_len.read_uint
       when RBzip2::FFI::BZ_PARAM_ERROR
         raise ArgumentError, 'One of sall or verbosity'
       when RBzip2::FFI::BZ_MEM_ERROR
