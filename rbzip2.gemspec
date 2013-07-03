@@ -12,8 +12,8 @@ Gem::Specification.new do |s|
   s.authors     = [ 'Sebastian Staudt' ]
   s.email       = [ 'koraktor@gmail.com' ]
   s.homepage    = 'https://github.com/koraktor/rbzip2'
-  s.summary     = 'Pure Ruby impementation of bzip2'
-  s.description = 'A pure Ruby implementation of the bzip2 compression algorithm.'
+  s.summary     = 'bzip2 for Ruby'
+  s.description = 'Various bzip2 implementations for Ruby.'
 
   s.files         = Dir['{lib}/**/*.rb', 'LICENSE', 'Rakefile', 'README.md']
   s.test_files    = Dir['{spec}/**/*_spec.rb']
