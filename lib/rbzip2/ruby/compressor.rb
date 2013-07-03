@@ -899,7 +899,7 @@ class RBzip2::Ruby::Compressor
         end
       end
 
-      gs = ge +1
+      gs = ge + 1
       rem_f -= a_freq
     end
   end
