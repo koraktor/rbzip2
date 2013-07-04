@@ -7,8 +7,8 @@ class RBzip2::IO
 
   def initialize(io)
     @io           = io
-    @compressor   = Ruby::Compressor.new io
-    @decompressor = Ruby::Decompressor.new io
+    @compressor   = RBzip2.default_adapter::Compressor.new io
+    @decompressor = RBzip2.default_adapter::Decompressor.new io
   end
 
   def close

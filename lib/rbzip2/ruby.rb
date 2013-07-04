@@ -3,10 +3,9 @@
 #
 # Copyright (c) 2013, Sebastian Staudt
 
-module RBzip2
-end unless defined? RBzip2
-
 module RBzip2::Ruby
+
+  extend RBzip2::Adapter
 
   autoload :CRC,          'rbzip2/ruby/crc'
   autoload :Compressor,   'rbzip2/ruby/compressor'

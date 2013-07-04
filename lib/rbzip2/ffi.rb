@@ -3,12 +3,20 @@
 #
 # Copyright (c) 2013, Sebastian Staudt
 
-module RBzip2
-end unless defined? RBzip2
-
-require 'ffi'
+require 'ffi' rescue nil
 
 module RBzip2::FFI
+
+  def self.init
+    begin
+      extend ::FFI::Library
+      ffi_lib 'bz2'
+    rescue LoadError
+      @@available = false
+    end
+  end
+
+  extend RBzip2::Adapter
 
   autoload :BufferError,  'rbzip2/ffi/errors'
   autoload :Compressor,   'rbzip2/ffi/compressor'
