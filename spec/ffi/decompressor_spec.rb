@@ -19,7 +19,12 @@ describe RBzip2::FFI::Decompressor do
     bz2_decompressor.size.should == 375
   end
 
-  it 'knows the size of the uncompressed data'
+  it 'knows the size of the uncompressed data' do
+    bz2_file = fixture 'fixtures/test.bz2'
+    bz2_decompressor = RBzip2::FFI::Decompressor.new bz2_file
+
+    bz2_decompressor.uncompressed.should == 704
+  end
 
   it 'should be able to decompress compressed data' do
     bz2_file = fixture 'fixtures/test.bz2'

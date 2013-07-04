@@ -84,4 +84,9 @@ class RBzip2::FFI::Decompressor
     end
   end
 
+  def uncompressed
+    @data = read
+    @data.size
+  end
+
 end
