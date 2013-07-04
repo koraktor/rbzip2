@@ -89,4 +89,8 @@ class RBzip2::FFI::Decompressor
     @data.size
   end
 
+  def inspect
+    "#<#{self.class}: @io=#{@io.inspect} size=#{size} uncompressed=#{uncompressed}>"
+  end
+
 end
