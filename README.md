@@ -4,7 +4,8 @@ RBzip2
 RBzip2 is a gem providing various implementations of the [bzip2][bzip2]
 algorithm used for compression and decompression. Currently, it includes a
 [FFI][ffi]-based implementation and a pure Ruby implementation that's slower
-but works on any Ruby VM.
+but works on any Ruby VM. Additionally, there's a JRuby specific implementation
+that's based on Commons Compress.
 
 The pure Ruby implementations is based on the code of the
 [Apache Commons Compress][commons] project and adds a straight Ruby-like API.
@@ -15,6 +16,9 @@ supported by those implementations.
 The FFI implementation is using `libbz2` and provides fast performance on
 platforms where both `libbz2` and FFI are available. It is derived from this
 [Gist by Brian Lopez][gist].
+
+The Java-based implementation can use the
+[Commons Compress Java library][commons] if it is available in the classpath.
 
 ## Features
 
@@ -67,6 +71,9 @@ but it is only available for MRI < 2.0.0 and Rubinius.
 
 The FFI implementation binds to `libbz2` as well and has almost the same
 performance as `bzip2-ruby`.
+
+The Java implementation uses a native Java library and is slower by a factor of
+about 2/10 while compressing/decompressing.
 
 The pure Ruby implementation of RBzip2 is inherently slower than `bzip2-ruby`.
 Currently, this is a plain port of Apache Commons' Java code to Ruby and no
