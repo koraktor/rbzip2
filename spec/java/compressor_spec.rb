@@ -8,7 +8,9 @@ require 'helper'
 describe RBzip2::Java::Compressor do
 
   before do
-    pending('Only available on JRuby') if RUBY_ENGINE != 'jruby'
+    unless defined?(::RUBY_ENGINE) && RUBY_ENGINE == 'jruby'
+      pending 'Only available on JRuby'
+    end
 
     @io = StringIO.new
     @bz2_compressor = RBzip2::Java::Compressor.new @io

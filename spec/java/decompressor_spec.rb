@@ -8,7 +8,9 @@ require 'helper'
 describe RBzip2::Java::Decompressor do
 
   before do
-    pending('Only available on JRuby') if RUBY_ENGINE != 'jruby'
+    unless defined?(::RUBY_ENGINE) && RUBY_ENGINE == 'jruby'
+      pending 'Only available on JRuby'
+    end
   end
 
   it 'acts like a standard IO' do
