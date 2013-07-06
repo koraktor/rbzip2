@@ -4,6 +4,6 @@ URL=http://www.us.apache.org/dist/commons/compress/binaries/commons-compress-${V
 
 if `ruby -v | grep -q jruby`; then
   mkdir java > /dev/null 2>&1
-  curl $URL | tar -xz -C java --include $JAR_PATH
+  curl $URL | tar -xz -C java $JAR_PATH
   export CLASSPATH=java/${JAR_PATH}
 fi
