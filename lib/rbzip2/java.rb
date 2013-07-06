@@ -8,7 +8,8 @@ module RBzip2::Java
   def self.init
     begin
       require 'java'
-      Java::OrgApacheCommonsCompressCompressorsBzip2
+      include_package 'org.apache.commons.compress.compressors.bzip2'
+      BZip2CompressorOutputStream
     rescue LoadError, NameError
       @@available = false
     end

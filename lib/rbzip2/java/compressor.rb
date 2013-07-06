@@ -5,12 +5,8 @@
 
 class RBzip2::Java::Compressor
 
-  if RBzip2::Java.available?
-    import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
-  end
-
   def initialize(io)
-    @io = BZip2CompressorOutputStream.new io.to_outputstream
+    @io = RBzip2::Java::BZip2CompressorOutputStream.new io.to_outputstream
   end
 
   def flush

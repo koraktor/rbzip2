@@ -5,10 +5,6 @@
 
 class RBzip2::Java::Decompressor
 
-  if RBzip2::Java.available?
-    import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
-  end
-
   def initialize(io)
     @io = io
   end
@@ -22,7 +18,7 @@ class RBzip2::Java::Decompressor
   def read(length = nil)
     raise 'stream closed' if @io.nil?
 
-    is = BZip2CompressorInputStream.new @io.to_inputstream
+    is = RBzip2::Java::BZip2CompressorInputStream.new @io.to_inputstream
 
     if length.nil?
       bytes = Java::byte[0].new
