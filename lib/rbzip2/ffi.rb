@@ -3,7 +3,10 @@
 #
 # Copyright (c) 2013, Sebastian Staudt
 
-require 'ffi' rescue nil
+begin
+  require 'ffi'
+rescue LoadError
+end
 
 module RBzip2::FFI
 
