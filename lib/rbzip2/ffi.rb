@@ -14,7 +14,7 @@ module RBzip2::FFI
     begin
       extend ::FFI::Library
       ffi_lib 'bz2'
-    rescue LoadError
+    rescue NameError, LoadError
       @@available = false
     end
   end
