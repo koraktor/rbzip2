@@ -8,3 +8,7 @@ group :development do
   gem 'rspec-expectations', '~> 2.14.0'
   gem 'yard', '~> 0.8.6'
 end
+
+group :test do
+  gem 'coveralls', '~> 0.6.7', :require => false
+end

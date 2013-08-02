@@ -1,6 +1,9 @@
 require 'rspec/core'
 require 'rspec/expectations'
 
+require 'coveralls'
+Coveralls.wear!
+
 require 'rbzip2'
 
 include RBzip2
