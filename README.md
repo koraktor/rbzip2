@@ -28,21 +28,27 @@ The Java-based implementation can use the
 
 ## Usage
 
-    require 'rbzip2'
+```ruby
+require 'rbzip2'
+```
 
 ### Compression
 
-    data = some_data
-    file = File.new 'somefile.bz2'      # open the target file
-    bz2  = RBzip2::Compressor.new file  # wrap the file into the compressor
-    bz2.write data                      # write the raw data to the compressor
-    bz2.close                           # finish compression (important!)
+```ruby
+data = some_data
+file = File.new 'somefile.bz2'      # open the target file
+bz2  = RBzip2::Compressor.new file  # wrap the file into the compressor
+bz2.write data                      # write the raw data to the compressor
+bz2.close                           # finish compression (important!)
+```
 
 ### Decompression
 
-    file = File.new 'somefile.bz2'        # open a compressed file
-    bz2  = RBzip2::Decompressor.new file  # wrap the file into the decompressor
-    data = io.read                        # read data into a string
+```ruby
+file = File.new 'somefile.bz2'        # open a compressed file
+bz2  = RBzip2::Decompressor.new file  # wrap the file into the decompressor
+data = io.read                        # read data into a string
+```
 
 ## Future plans
 
@@ -54,12 +60,16 @@ The Java-based implementation can use the
 
 To install RBzip2 as a Ruby gem use the following command:
 
-    gem install rbzip2
+```sh
+$ gem install rbzip2
+```
 
 To use it as a dependency managed by Bundler add the following to your
 `Gemfile`:
 
-    gem 'rbzip2'
+```ruby
+gem 'rbzip2'
+```
 
 If you want to use the FFI implementation on any non-JRuby VM, be sure to also
 install the `ffi` gem.
