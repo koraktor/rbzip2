@@ -13,7 +13,7 @@ group :test do
   gem 'coveralls', '~> 0.8', :require => false
 end
 
-platforms :jruby, :ruby_18, :ruby_19 do
+if Bundler.current_ruby.jruby_1? || Bundler.current_ruby.ruby_1?
   gem 'json', '< 2'
   gem 'term-ansicolor', '< 1.4'
   gem 'tins', '< 1.7'
