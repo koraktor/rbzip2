@@ -15,4 +15,6 @@ end
 
 platforms :ruby_18, :ruby_19 do
   gem 'json', '< 2'
+  gem 'term-ansicolor', '< 1.4'
+  gem 'tins', '< 1.7'
 end
