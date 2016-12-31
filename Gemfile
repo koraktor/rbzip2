@@ -13,7 +13,7 @@ group :test do
   gem 'coveralls', '~> 0.8', :require => false
 end
 
-platforms :ruby_18, :ruby_19 do
+platforms :jruby, :ruby_18, :ruby_19 do
   gem 'json', '< 2'
   gem 'term-ansicolor', '< 1.4'
   gem 'tins', '< 1.7'
