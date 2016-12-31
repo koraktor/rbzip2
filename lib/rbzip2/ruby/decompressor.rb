@@ -131,7 +131,7 @@ class RBzip2::Ruby::Decompressor
 
     raise 'BZip2 CRC error' if @stored_block_crc != @computed_block_crc
 
-    @computed_combined_crc = (@computed_combined_crc << 1) | (@computed_combined_crc >> 31)
+    @computed_combined_crc = ((@computed_combined_crc << 1) & 0xffffffff) | (@computed_combined_crc >> 31)
     @computed_combined_crc ^= @computed_block_crc
   end
 
