@@ -1,7 +1,7 @@
 # This code is free software; you can redistribute it and/or modify it under
 # the terms of the new BSD License.
 #
-# Copyright (c) 2011-2013, Sebastian Staudt
+# Copyright (c) 2011-2016, Sebastian Staudt
 
 require 'core_ext/io'
 
@@ -129,12 +129,7 @@ class RBzip2::Ruby::Decompressor
   def end_block
     @computed_block_crc = @crc.final_crc
 
-    if @stored_block_crc != @computed_block_crc
-      @computed_combined_crc = (@stored_combined_crc << 1) | (@stored_combined_crc >> 31)
-      @computed_combined_crc ^= @stored_block_crc
-
-      raise 'BZip2 CRC error'
-    end
+    raise 'BZip2 CRC error' if @stored_block_crc != @computed_block_crc
 
     @computed_combined_crc = (@computed_combined_crc << 1) | (@computed_combined_crc >> 31)
     @computed_combined_crc ^= @computed_block_crc
