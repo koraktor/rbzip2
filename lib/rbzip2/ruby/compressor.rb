@@ -1,7 +1,7 @@
 # This code is free software; you can redistribute it and/or modify it under
 # the terms of the new BSD License.
 #
-# Copyright (c) 2011-2013, Sebastian Staudt
+# Copyright (c) 2011-2017, Sebastian Staudt
 
 class RBzip2::Ruby::Compressor
 
@@ -63,7 +63,6 @@ class RBzip2::Ruby::Compressor
         heap[1] = heap[n_heap]
         n_heap -= 1
 
-        yy  = 0
         zz  = 1
         tmp = heap[1]
 
@@ -86,7 +85,6 @@ class RBzip2::Ruby::Compressor
         heap[1] = heap[n_heap]
         n_heap -= 1
 
-        yy = 0
         zz = 1
         tmp = heap[1]
 
@@ -119,7 +117,6 @@ class RBzip2::Ruby::Compressor
         n_heap += 1
         heap[n_heap] = n_nodes
 
-        tmp = 0
         zz = n_heap
         tmp = heap[zz]
         weight_tmp = weight[tmp]
@@ -484,7 +481,7 @@ class RBzip2::Ruby::Compressor
       (ftab[ss << 8] & CLEARMASK).upto(hj - 1) do |j|
         fmap_j = fmap[j]
         c1 = block[fmap_j] & 0xff
-        if !big_done[c1]
+        unless big_done[c1]
           fmap[copy[c1]] = (fmap_j == 0) ? last_shadow : (fmap_j - 1)
           copy[c1] += 1
         end
@@ -636,7 +633,6 @@ class RBzip2::Ruby::Compressor
     work_limit_shadow = @work_limit
     work_done_shadow = @work_done
 
-    a = nil
     h = nil
     i1 = nil
     i2 = nil
@@ -692,7 +688,7 @@ class RBzip2::Ruby::Compressor
             else
               return false
             end
-          elsif (quadrant[i1] > quadrant[i2])
+          elsif quadrant[i1] > quadrant[i2]
             return true
           else
             return false

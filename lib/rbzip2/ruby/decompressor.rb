@@ -1,7 +1,7 @@
 # This code is free software; you can redistribute it and/or modify it under
 # the terms of the new BSD License.
 #
-# Copyright (c) 2011-2016, Sebastian Staudt
+# Copyright (c) 2011-2017, Sebastian Staudt
 
 require 'core_ext/io'
 
@@ -215,7 +215,6 @@ class RBzip2::Ruby::Decompressor
       b = base[i]
       nb = base[i + 1]
       vec += nb - b
-      b = nb
       limit[i] = vec -1
       vec = vec << 1
     end
