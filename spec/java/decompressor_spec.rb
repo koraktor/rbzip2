@@ -7,13 +7,6 @@ require 'helper'
 
 describe RBzip2::Java::Decompressor do
 
-  before do
-    unless defined?(::RUBY_ENGINE) && RUBY_ENGINE == 'jruby'
-      pending 'Only available on JRuby'
-      fail 'Not on JRuby'
-    end
-  end
-
   it_behaves_like 'a decompressor'
 
-end
+end if java?

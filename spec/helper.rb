@@ -11,7 +11,10 @@ include RBzip2
 RSpec.configure do |config|
   config.color = true
   config.formatter = :documentation
-  config.mock_framework = :mocha
+end
+
+def java?
+  defined?(::RUBY_ENGINE) && RUBY_ENGINE == 'jruby'
 end
 
 def fixture(file)
