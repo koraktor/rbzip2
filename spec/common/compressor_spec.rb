@@ -14,7 +14,7 @@ shared_examples_for 'a compressor' do
 
   it 'acts like a standard IO' do
     methods = described_class.instance_methods.map &:to_sym
-    methods.should include(:write, :close)
+    expect(methods).to include(:write, :close)
   end
 
   it 'should be able to compress raw data' do
@@ -25,7 +25,7 @@ shared_examples_for 'a compressor' do
 
     eq_bz2 = eq bz2_file.read
     eq_bz2.instance_variable_set :@diffable, false
-    @io.string.should eq_bz2
+    expect(@io.string).to eq_bz2
   end
 
   it 'should be able to compress large raw data' do
@@ -38,7 +38,7 @@ shared_examples_for 'a compressor' do
 
     eq_bz2 = eq bz2_file.read
     eq_bz2.instance_variable_set :@diffable, false
-    @io.string.should eq_bz2
+    expect(@io.string).to eq_bz2
   end
 
   after do

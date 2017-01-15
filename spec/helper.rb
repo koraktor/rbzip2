@@ -9,7 +9,8 @@ require 'rbzip2'
 include RBzip2
 
 RSpec.configure do |config|
-  config.color_enabled = true
+  config.color = true
+  config.formatter = :documentation
   config.mock_framework = :mocha
 end
 

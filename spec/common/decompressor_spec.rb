@@ -16,14 +16,14 @@ shared_examples_for 'a decompressor' do
     bz2_file = fixture 'fixtures/test.bz2'
     bz2_decompressor = described_class.new bz2_file
 
-    bz2_decompressor.size.should == 375
+    expect(bz2_decompressor.size).to eq(375)
   end
 
   it 'knows the size of the uncompressed data' do
     bz2_file = fixture 'fixtures/test.bz2'
     bz2_decompressor = described_class.new bz2_file
 
-    bz2_decompressor.uncompressed.should == 704
+    expect(bz2_decompressor.uncompressed).to eq(704)
   end
 
   it 'should be able to decompress compressed data' do
@@ -31,7 +31,7 @@ shared_examples_for 'a decompressor' do
     bz2_decompressor = described_class.new bz2_file
     txt_file = fixture 'fixtures/test.txt'
 
-    bz2_decompressor.read.should eq(txt_file.read)
+    expect(bz2_decompressor.read).to eq(txt_file.read)
   end
 
   it 'should be able to decompress large compressed data' do
@@ -39,7 +39,7 @@ shared_examples_for 'a decompressor' do
     bz2_file = fixture 'fixtures/big_test.bz2'
     bz2_decompressor = described_class.new bz2_file
 
-    bz2_decompressor.read.should eq(txt_file.read)
+    expect(bz2_decompressor.read).to eq(txt_file.read)
   end
 
 end
