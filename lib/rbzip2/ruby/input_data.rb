@@ -36,7 +36,6 @@ class RBzip2::Ruby::InputData
 
   def init_tt(size)
     @tt = Array.new(size) if @tt.nil? || @tt.size < size
-    @tt
   end
 
 end

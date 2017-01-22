@@ -157,9 +157,7 @@ class RBzip2::Ruby::Compressor
   def self.vswap(fmap, p1, p2, n)
     n += p1
     while p1 < n
-      t = fmap[p1]
-      fmap[p1] = fmap[p2]
-      fmap[p2] = t
+      fmap[p1], fmap[p2] = fmap[p2], fmap[p1]
       p1 += 1
       p2 += 1
     end
@@ -306,15 +304,13 @@ class RBzip2::Ruby::Compressor
     z_pend = 0
 
     0.upto(last_shadow) do |i|
-      ll_i = unseq_to_seq[block[fmap[i]] & 0xff]
+      ll_i = unseq_to_seq[block[fmap[i]]]
       tmp = yy[0]
       j = 0
 
       while ll_i != tmp
         j += 1
-        tmp2 = tmp
-        tmp = yy[j]
-        yy[j] = tmp2
+        tmp, yy[j] = yy[j], tmp
       end
       yy[0] = tmp
 
@@ -400,42 +396,37 @@ class RBzip2::Ruby::Compressor
     block = data_shadow.block
     fmap = data_shadow.fmap
     quadrant = data_shadow.quadrant
-    last_shadow = @last
-    work_limit_shadow = @work_limit
-    first_attempt_shadow = @first_attempt
 
     65537.times { |i| ftab[i] = 0 }
 
     NUM_OVERSHOOT_BYTES.times do |i|
-      block[last_shadow + i + 2] = block[(i % (last_shadow + 1)) + 1]
+      block[@last + i + 2] = block[(i % (@last + 1)) + 1]
     end
-    (last_shadow + NUM_OVERSHOOT_BYTES).times do |i|
+    (@last + NUM_OVERSHOOT_BYTES).times do |i|
       quadrant[i] = 0
     end
-    block[0] = block[last_shadow + 1]
+    block[0] = block[@last + 1]
 
-    c1 = block[0] & 0xff
-    (last_shadow + 1).times do |i|
-      c2 = block[i + 1] & 0xff
+    c1 = block[0]
+    (@last + 1).times do |i|
+      c2 = block[i + 1]
       ftab[(c1 << 8) + c2] += 1
       c1 = c2
     end
 
     1.upto(65536) { |i| ftab[i] += ftab[i - 1] }
 
-    c1 = block[1] & 0xff
-    last_shadow.times do |i|
-      c2 = block[i + 2] & 0xff
+    c1 = block[1]
+    @last.times do |i|
+      c2 = block[i + 2]
       fmap[ftab[(c1 << 8) + c2] -= 1] = i
       c1 = c2
     end
 
-    fmap[ftab[((block[last_shadow + 1] & 0xff) << 8) + (block[1] & 0xff)] -= 1] = last_shadow
+    fmap[ftab[((block[@last + 1]) << 8) + block[1]] -= 1] = @last
 
-    256.times do |i|
-      big_done[i] = false
-      running_order[i] = i
-    end
+    big_done.replace Array.new(256, false)
+    256.times { |i| running_order[i] = i }
 
     h = 364
     while h != 1
@@ -469,7 +460,7 @@ class RBzip2::Ruby::Compressor
           hi = (ftab[sb + 1] & CLEARMASK) - 1
           if hi > lo
             main_qsort3 data_shadow, lo, hi, 2
-            return if first_attempt_shadow && (@work_done > work_limit_shadow)
+            return if @first_attempt && (@work_done > @work_limit)
           end
           ftab[sb] = ftab_sb | SETMASK
         end
@@ -480,9 +471,9 @@ class RBzip2::Ruby::Compressor
       hj = ftab[(ss + 1) << 8] & CLEARMASK
       (ftab[ss << 8] & CLEARMASK).upto(hj - 1) do |j|
         fmap_j = fmap[j]
-        c1 = block[fmap_j] & 0xff
+        c1 = block[fmap_j]
         unless big_done[c1]
-          fmap[copy[c1]] = (fmap_j == 0) ? last_shadow : (fmap_j - 1)
+          fmap[copy[c1]] = (fmap_j == 0) ? @last : (fmap_j - 1)
           copy[c1] += 1
         end
       end
@@ -505,7 +496,7 @@ class RBzip2::Ruby::Compressor
           q_val = j >> shifts
           quadrant[a2update] = q_val
           if a2update < NUM_OVERSHOOT_BYTES
-            quadrant[a2update + last_shadow + 1] = q_val
+            quadrant[a2update + @last + 1] = q_val
           end
         end
       end
@@ -533,7 +524,7 @@ class RBzip2::Ruby::Compressor
         return if main_simple_sort data_shadow, lo, hi, d
       else
         d1 = d + 1
-        med = self.class.med3(block[fmap[lo] + d1], block[fmap[hi] + d1], block[fmap[(lo + hi) >> 1] + d1]) & 0xff
+        med = self.class.med3 block[fmap[lo] + d1], block[fmap[hi] + d1], block[fmap[(lo + hi) >> 1] + d1]
 
         un_lo = lo
         un_hi = hi
@@ -542,11 +533,9 @@ class RBzip2::Ruby::Compressor
 
         while true
           while un_lo <= un_hi
-            n = (block[fmap[un_lo] + d1] & 0xff) - med
+            n = block[fmap[un_lo] + d1] - med
             if n == 0
-              temp = fmap[un_lo]
-              fmap[un_lo] = fmap[lt_lo]
-              fmap[lt_lo] = temp
+              fmap[un_lo], fmap[lt_lo] = fmap[lt_lo], fmap[un_lo]
               un_lo += 1
               lt_lo += 1
             elsif n < 0
@@ -557,11 +546,9 @@ class RBzip2::Ruby::Compressor
           end
 
           while un_lo <= un_hi
-            n = (block[fmap[un_hi] + d1] & 0xff) - med
+            n = block[fmap[un_hi] + d1] - med
             if n == 0
-              temp = fmap[un_hi]
-              fmap[un_hi] = fmap[gt_hi]
-              fmap[gt_hi] = temp
+              fmap[un_hi], fmap[gt_hi] = fmap[gt_hi], fmap[un_hi]
               un_hi -= 1
               gt_hi -= 1
             elsif n > 0
@@ -572,9 +559,7 @@ class RBzip2::Ruby::Compressor
           end
 
           if un_lo <= un_hi
-            temp = fmap[un_lo]
-            fmap[un_lo] = fmap[un_hi]
-            fmap[un_hi] = temp
+            fmap[un_lo], fmap[un_hi] = fmap[un_hi], fmap[un_lo]
             un_lo += 1
             un_hi -= 1
           else
@@ -596,20 +581,10 @@ class RBzip2::Ruby::Compressor
           n = lo + un_lo - lt_lo - 1
           m = hi - (gt_hi - un_hi) + 1
 
-          stack_ll[sp] = lo
-          stack_hh[sp] = n
-          stack_dd[sp] = d
-          sp += 1
-
-          stack_ll[sp] = n + 1
-          stack_hh[sp] = m - 1
-          stack_dd[sp] = d1
-          sp += 1
-
-          stack_ll[sp] = m
-          stack_hh[sp] = hi
-          stack_dd[sp] = d
-          sp += 1
+          stack_ll[sp, 3] = lo, n + 1, m
+          stack_hh[sp, 3] = n, m - 1, hi
+          stack_dd[sp, 3] = d, d1, d
+          sp += 3
         end
       end
     end
@@ -629,9 +604,6 @@ class RBzip2::Ruby::Compressor
     block = data_shadow.block
     last_shadow = @last
     last_plus_1 = last_shadow + 1
-    first_attempt_shadow = @first_attempt
-    work_limit_shadow = @work_limit
-    work_done_shadow = @work_done
 
     h = nil
     i1 = nil
@@ -656,14 +628,14 @@ class RBzip2::Ruby::Compressor
                       if quadrant[i1 + 3] == quadrant[i2 + 3]
                         i1 -= last_plus_1 if (i1 += 4) >= last_plus_1
                         i2 -= last_plus_1 if (i2 += 4) >= last_plus_1
-                        work_done_shadow += 1
+                        @work_done += 1
                         next
                       elsif quadrant[i1 + 3] > quadrant[i2 + 3]
                         return true
                       else
                         return false
                       end
-                    elsif (block[i1 + 4] & 0xff) > (block[i2 + 4] & 0xff)
+                    elsif block[i1 + 4] > block[i2 + 4]
                       return true
                     else
                       return false
@@ -673,7 +645,7 @@ class RBzip2::Ruby::Compressor
                   else
                     return false
                   end
-                elsif (block[i1 + 3] & 0xff) > (block[i2 + 3] & 0xff)
+                elsif block[i1 + 3] > block[i2 + 3]
                   return true
                 else
                   return false
@@ -683,7 +655,7 @@ class RBzip2::Ruby::Compressor
               else
                 return false
               end
-            elsif (block[i1 + 2] & 0xff) > (block[i2 + 2] & 0xff)
+            elsif block[i1 + 2] > block[i2 + 2]
               return true
             else
               return false
@@ -693,7 +665,7 @@ class RBzip2::Ruby::Compressor
           else
             return false
           end
-        elsif (block[i1 + 1] & 0xff) > (block[i2 + 1] & 0xff)
+        elsif block[i1 + 1] > block[i2 + 1]
           return true
         else
           return false
@@ -728,33 +700,33 @@ class RBzip2::Ruby::Compressor
 
                     break unless x_loop.call
                   else
-                    if (block[i1] & 0xff) > (block[i2] & 0xff)
+                    if block[i1] > block[i2]
                       next
                     else
                       break
                     end
                   end
-                elsif (block[i1 + 5] & 0xff) > (block[i2 + 5] & 0xff)
+                elsif block[i1 + 5] > block[i2 + 5]
                   next
                 else
                   break
                 end
-              elsif (block[i1 + 4] & 0xff) > (block[i2 + 4] & 0xff)
+              elsif block[i1 + 4] > block[i2 + 4]
                 next
               else
                 break
               end
-            elsif (block[i1 + 3] & 0xff) > (block[i2 + 3] & 0xff)
+            elsif block[i1 + 3] > block[i2 + 3]
               next
             else
               break
             end
-          elsif (block[i1 + 2] & 0xff) > (block[i2 + 2] & 0xff)
+          elsif block[i1 + 2]  > block[i2 + 2]
             next
           else
             break
           end
-        elsif (block[i1 + 1] & 0xff) > (block[i2 + 1] & 0xff)
+        elsif block[i1 + 1] > block[i2 + 1]
           next
         else
           break
@@ -784,12 +756,10 @@ class RBzip2::Ruby::Compressor
         end
       end
 
-      break if first_attempt_shadow && i <= hi && work_done_shadow > work_limit_shadow
+      break if @first_attempt && i <= hi && @work_done > @work_limit
     end
 
-    @work_done = work_done_shadow
-
-    first_attempt_shadow && (work_done_shadow > work_limit_shadow)
+    @first_attempt && @work_done > @work_limit
   end
 
   def move_to_front_code_and_send
@@ -811,9 +781,8 @@ class RBzip2::Ruby::Compressor
   end
 
   def randomize_block
-    in_use      = @data.in_use
-    block       = @data.block
-    last_shadow = @last
+    in_use = @data.in_use
+    block  = @data.block
 
     256.times { |i| in_use[i] = false }
 
@@ -821,7 +790,7 @@ class RBzip2::Ruby::Compressor
     r_t_pos = 0
     j = 1
     i = 0
-    while i <= last_shadow
+    while i <= @last
       i = j
 
       if r_n_to_go == 0
@@ -832,7 +801,7 @@ class RBzip2::Ruby::Compressor
       r_n_to_go -= 1
       block[j] ^= r_n_to_go == 1 ? 1 : 0
 
-      in_use[block[j] & 0xff] = true
+      in_use[block[j]] = true
 
       j += 1
     end
@@ -914,7 +883,6 @@ class RBzip2::Ruby::Compressor
     len_3 = len[3]
     len_4 = len[4]
     len_5 = len[5]
-    n_mtf_shadow = @n_mtf
     n_selectors = 0
 
     N_ITERS.times do
@@ -928,7 +896,7 @@ class RBzip2::Ruby::Compressor
 
       gs = 0
       while gs < @n_mtf
-        ge = [gs + G_SIZE - 1, n_mtf_shadow - 1].min
+        ge = [gs + G_SIZE - 1, @n_mtf - 1].min
 
         if n_groups == N_GROUPS
           cost0 = 0
@@ -1004,9 +972,7 @@ class RBzip2::Ruby::Compressor
 
       while ll_i != tmp
         j += 1
-        tmp2 = tmp
-        tmp = pos[j]
-        pos[j] = tmp2
+        tmp, pos[j] = pos[j], tmp
       end
 
       pos[0] = tmp
@@ -1044,7 +1010,7 @@ class RBzip2::Ruby::Compressor
       end
     end
 
-    16.times { |i| w 1, (in_use_16[i] ? 1 : 0) }
+    16.times { |i| w 1, in_use_16[i] ? 1 : 0 }
 
     io_shadow   = @io
     live_shadow = @live
@@ -1108,83 +1074,71 @@ class RBzip2::Ruby::Compressor
 
   def send_mtf_values6(n_groups, alpha_size)
     len = @data.send_mtf_values_len
-    io_shadow = @io
-
-    live_shadow = @live
-    buff_shadow = @buff
 
     n_groups.times do |t|
       len_t = len[t]
       curr = len_t[0] & 0xff
 
-      while live_shadow >= 8
-        io_shadow.write(((buff_shadow >> 24) & 0xffffffff).chr)
-        buff_shadow <<= 8
-        buff_shadow &= 0xffffffff
-        live_shadow -= 8
+      while @live >= 8
+        @io.write(((@buff >> 24) & 0xffffffff).chr)
+        @buff <<= 8
+        @buff &= 0xffffffff
+        @live -= 8
       end
-      buff_shadow |= curr << (32 - live_shadow - 5)
-      live_shadow += 5
+      @buff |= curr << (32 - @live - 5)
+      @live += 5
 
       alpha_size.times do |i|
         lti = len_t[i] & 0xff
         while curr < lti
-          while live_shadow >= 8
-            io_shadow.write(((buff_shadow >> 24) & 0xffffffff).chr)
-            buff_shadow <<= 8
-            buff_shadow &= 0xffffffff
-            live_shadow -= 8
+          while @live >= 8
+            @io.write(((@buff >> 24) & 0xffffffff).chr)
+            @buff <<= 8
+            @buff &= 0xffffffff
+            @live -= 8
           end
-          buff_shadow |= 2 << (32 - live_shadow - 2)
-          live_shadow += 2
+          @buff |= 2 << (32 - @live - 2)
+          @live += 2
 
           curr += 1
         end
 
         while curr > lti
-          while live_shadow >= 8
-            io_shadow.write(((buff_shadow >> 24) & 0xffffffff).chr)
-            buff_shadow <<= 8
-            buff_shadow &= 0xffffffff
-            live_shadow -= 8
+          while @live >= 8
+            @io.write(((@buff >> 24) & 0xffffffff).chr)
+            @buff <<= 8
+            @buff &= 0xffffffff
+            @live -= 8
           end
-          buff_shadow |= 3 << (32 - live_shadow - 2)
-          live_shadow += 2
+          @buff |= 3 << (32 - @live - 2)
+          @live += 2
 
           curr -= 1
         end
 
-        while live_shadow >= 8
-          io_shadow.write(((buff_shadow >> 24) & 0xffffffff).chr)
-          buff_shadow <<= 8
-          buff_shadow &= 0xffffffff
-          live_shadow -= 8
+        while @live >= 8
+          @io.write(((@buff >> 24) & 0xffffffff).chr)
+          @buff <<= 8
+          @buff &= 0xffffffff
+          @live -= 8
         end
-        live_shadow += 1
+        @live += 1
       end
     end
-
-    @buff = buff_shadow
-    @live = live_shadow
   end
 
   def send_mtf_values7
     data_shadow = @data
     len = data_shadow.send_mtf_values_len
     code = data_shadow.send_mtf_values_code
-    io_shadow = @io
     selector = data_shadow.selector
     sfmap = data_shadow.sfmap
-    n_mtf_shadow = @n_mtf
 
     sel_ctr = 0
 
-    live_shadow = @live
-    buff_shadow = @buff
-
     gs = 0
-    while gs < n_mtf_shadow
-      ge = [gs + G_SIZE - 1, n_mtf_shadow - 1].min
+    while gs < @n_mtf
+      ge = [gs + G_SIZE - 1, @n_mtf - 1].min
       selector_sel_ctr = selector[sel_ctr] & 0xff
       code_sel_ctr = code[selector_sel_ctr]
       len_sel_ctr = len[selector_sel_ctr]
@@ -1192,15 +1146,15 @@ class RBzip2::Ruby::Compressor
       while gs <= ge
         sfmap_i = sfmap[gs]
 
-        while live_shadow >= 8
-          io_shadow.write(((buff_shadow >> 24) & 0xffffffff).chr)
-          buff_shadow <<= 8
-          buff_shadow &= 0xffffffff
-          live_shadow -= 8
+        while @live >= 8
+          @io.write(((@buff >> 24) & 0xffffffff).chr)
+          @buff <<= 8
+          @buff &= 0xffffffff
+          @live -= 8
         end
         n = len_sel_ctr[sfmap_i] & 0xff
-        buff_shadow |= code_sel_ctr[sfmap_i] << (32 - live_shadow - n)
-        live_shadow += n
+        @buff |= code_sel_ctr[sfmap_i] << (32 - @live - n)
+        @live += n
 
         gs += 1
       end
@@ -1208,25 +1162,18 @@ class RBzip2::Ruby::Compressor
       gs = ge + 1
       sel_ctr += 1
     end
-
-    @buff = buff_shadow
-    @live = live_shadow
   end
 
   def w(n, v)
-    io_shadow = @io
-    live_shadow = @live
-    buff_shadow = @buff
-
-    while live_shadow >= 8
-      io_shadow.write(((buff_shadow >> 24) & 0xffffffff).chr)
-      buff_shadow <<= 8
-      buff_shadow &= 0xffffffff
-      live_shadow -= 8
+    while @live >= 8
+      @io.write ((@buff >> 24) & 0xffffffff).chr
+      @buff <<= 8
+      @buff &= 0xffffffff
+      @live -= 8
     end
 
-    @buff = buff_shadow | (v << (32 - live_shadow - n))
-    @live = live_shadow + n
+    @buff = @buff | (v << (32 - @live - n))
+    @live = @live + n
   end
 
   def write(bytes)
@@ -1236,8 +1183,8 @@ class RBzip2::Ruby::Compressor
   end
 
   def write0(b)
+    b &= 0xff
     if @current_char != -1
-      b &= 0xff
       if @current_char == b
         @run_length += 1
         if @run_length > 254
@@ -1251,50 +1198,46 @@ class RBzip2::Ruby::Compressor
         @current_char = b
       end
     else
-      @current_char = b & 0xff
+      @current_char = b
       @run_length += 1
     end
   end
 
   def write_run
-    last_shadow = @last
-
-    if last_shadow < @allowable_block_size
-      current_char_shadow = @current_char
+    if @last < @allowable_block_size
+      ch = @current_char
       data_shadow = @data
-      data_shadow.in_use[current_char_shadow] = true
-      ch = current_char_shadow
+      data_shadow.in_use[ch] = true
+      block = data_shadow.block
 
       run_length_shadow = @run_length
-      run_length_shadow.times { @crc.update_crc current_char_shadow }
+      run_length_shadow.times { @crc.update_crc ch }
 
       case run_length_shadow
         when 1
-          data_shadow.block[last_shadow + 2] = ch
-          @last = last_shadow + 1
+          block[@last + 2] = ch
+          @last += 1
 
         when 2
-          data_shadow.block[last_shadow + 2] = ch
-          data_shadow.block[last_shadow + 3] = ch
-          @last = last_shadow + 2
+          block[@last + 2] = ch
+          block[@last + 3] = ch
+          @last += 2
 
         when 3
-          block = data_shadow.block
-          block[last_shadow + 2] = ch
-          block[last_shadow + 3] = ch
-          block[last_shadow + 4] = ch
-          @last = last_shadow + 3
+          block[@last + 2] = ch
+          block[@last + 3] = ch
+          block[@last + 4] = ch
+          @last += 3
 
         else
           run_length_shadow -= 4
           data_shadow.in_use[run_length_shadow] = true
-          block = data_shadow.block
-          block[last_shadow + 2] = ch
-          block[last_shadow + 3] = ch
-          block[last_shadow + 4] = ch
-          block[last_shadow + 5] = ch
-          block[last_shadow + 6] = run_length_shadow
-          @last = last_shadow + 5
+          block[@last + 2] = ch
+          block[@last + 3] = ch
+          block[@last + 4] = ch
+          block[@last + 5] = ch
+          block[@last + 6] = run_length_shadow
+          @last += 5
       end
     else
       end_block

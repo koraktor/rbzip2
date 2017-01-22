@@ -181,7 +181,7 @@ class RBzip2::Ruby::Decompressor
   end
 
   def int
-    (((((r(8) << 8) | r(8)) << 8) | r(8)) << 8) | r(8)
+    r 32
   end
 
   def create_decode_tables(limit, base, perm, length, min_len, max_len, alpha_size)
@@ -195,10 +195,8 @@ class RBzip2::Ruby::Decompressor
       end
     end
 
-    MAX_CODE_LEN.downto 1 do |i|
-      base[i] = 0
-      limit[i] = 0
-    end
+    base[1..MAX_CODE_LEN] = 0
+    limit[1..MAX_CODE_LEN] = 0
 
     alpha_size.times do |i|
       base[length[i] + 1] += 1
@@ -215,7 +213,7 @@ class RBzip2::Ruby::Decompressor
       b = base[i]
       nb = base[i + 1]
       vec += nb - b
-      limit[i] = vec -1
+      limit[i] = vec - 1
       vec = vec << 1
     end
 
@@ -236,9 +234,7 @@ class RBzip2::Ruby::Decompressor
       in_use16 |= 1 << i if bit
     end
 
-    255.downto(0) do |i|
-      in_use[i] = false
-    end
+    in_use.fill false
 
     16.times do |i|
        if (in_use16 & (1 << i)) != 0
@@ -260,15 +256,13 @@ class RBzip2::Ruby::Decompressor
       while bit
         j += 1
       end
-      selector_mtf[i] = j
+      selector_mtf[i] = j & 0xff
     end
 
-    groups.downto(0) do |v|
-      pos[v] = v
-    end
+    pos.fill(0..groups) { |v| v & 0xff }
 
     selectors.times do |i|
-      v = selector_mtf[i] & 0xff
+      v = selector_mtf[i]
       tmp = pos[v]
 
       while v > 0 do
@@ -334,26 +328,22 @@ class RBzip2::Ruby::Decompressor
     perm = @data.perm
     limit_last = @block_size * BASEBLOCKSIZE
 
-    256.downto(0) do |i|
-      yy[i] = i
-      unzftab[i] = 0
-    end
+    yy.fill(0..256) { |i| i }
+    unzftab.fill 0
 
     group_no = 0
     group_pos = G_SIZE - 1
     eob = @n_in_use + 1
     next_sym = get_and_move_to_front_decode0 0
-    buff_shadow = @buff
-    live_shadow = @live
-    last_shadow = -1
-    zt = selector[group_no] & 0xff
+    @last = -1
+    zt = selector[group_no]
     base_zt = base[zt]
     limit_zt = limit[zt]
     perm_zt = perm[zt]
     min_lens_zt = min_lens[zt]
 
     while next_sym != eob
-      if (next_sym == RUNA) || (next_sym == RUNB)
+      if next_sym == RUNA || next_sym == RUNB
         s = -1
 
         n = 1
@@ -369,7 +359,7 @@ class RBzip2::Ruby::Decompressor
           if group_pos == 0
             group_pos = G_SIZE - 1
             group_no += 1
-            zt = selector[group_no] & 0xff
+            zt = selector[group_no]
             base_zt = base[zt]
             limit_zt = limit[zt]
             perm_zt = perm[zt]
@@ -380,32 +370,32 @@ class RBzip2::Ruby::Decompressor
 
           zn = min_lens_zt
 
-          while live_shadow < zn
+          while @live < zn
             thech = @io.readbyte
 
             raise 'unexpected end of stream' if thech < 0
 
-            buff_shadow = ((buff_shadow << 8) & 0xffffffff) | thech
-            live_shadow += 8
+            @buff = ((@buff << 8) & 0xffffffff) | thech
+            @live += 8
           end
 
-          zvec = ((buff_shadow >> (live_shadow - zn)) & 0xffffffff) & ((1 << zn) - 1)
-          live_shadow -= zn
+          zvec = ((@buff >> (@live - zn)) & 0xffffffff) & ((1 << zn) - 1)
+          @live -= zn
 
           while zvec > limit_zt[zn]
             zn += 1
 
-            while live_shadow < 1
+            while @live < 1
               thech = @io.readbyte
 
               raise 'unexpected end of stream' if thech < 0
 
-              buff_shadow = ((buff_shadow << 8) & 0xffffffff) | thech
-              live_shadow += 8
+              @buff = ((@buff << 8) & 0xffffffff) | thech
+              @live += 8
             end
 
-            live_shadow -= 1
-            zvec = (zvec << 1) | ((buff_shadow >> live_shadow) & 1)
+            @live -= 1
+            zvec = (zvec << 1) | ((@buff >> @live) & 1)
           end
 
           next_sym = perm_zt[zvec - base_zt[zn]]
@@ -417,19 +407,19 @@ class RBzip2::Ruby::Decompressor
         unzftab[ch & 0xff] += s + 1
 
         while s >= 0
-          last_shadow += 1
-          ll8[last_shadow] = ch
+          @last += 1
+          ll8[@last] = ch
           s -= 1
         end
 
-        raise 'block overrun' if last_shadow >= limit_last
+        raise 'block overrun' if @last >= limit_last
       else
-        last_shadow += 1
-        raise 'block overrun' if last_shadow >= limit_last
+        @last += 1
+        raise 'block overrun' if @last >= limit_last
 
         tmp = yy[next_sym - 1]
-        unzftab[seq_to_unseq[tmp] & 0xff] += 1
-        ll8[last_shadow] = seq_to_unseq[tmp]
+        unzftab[seq_to_unseq[tmp]] += 1
+        ll8[@last] = seq_to_unseq[tmp]
 
         yy[1, next_sym - 1] = yy[0, next_sym - 1]
         yy[0] = tmp
@@ -437,7 +427,7 @@ class RBzip2::Ruby::Decompressor
         if group_pos == 0
           group_pos = G_SIZE - 1
           group_no += 1
-          zt = selector[group_no] & 0xff
+          zt = selector[group_no]
           base_zt = base[zt]
           limit_zt = limit[zt]
           perm_zt = perm[zt]
@@ -448,66 +438,57 @@ class RBzip2::Ruby::Decompressor
 
         zn = min_lens_zt
 
-        while live_shadow < zn
+        while @live < zn
           thech = @io.readbyte
 
           raise 'unexpected end of stream' if thech < 0
 
-          buff_shadow = ((buff_shadow << 8) & 0xffffffff) | thech
-          live_shadow += 8
+          @buff = ((@buff << 8) & 0xffffffff) | thech
+          @live += 8
         end
-        zvec = (buff_shadow >> (live_shadow - zn)) & ((1 << zn) - 1)
-        live_shadow -= zn
+        zvec = (@buff >> (@live - zn)) & ((1 << zn) - 1)
+        @live -= zn
 
         while zvec > limit_zt[zn]
           zn += 1
-          while live_shadow < 1
+          while @live < 1
             thech = @io.readbyte
 
             raise 'unexpected end of stream' if thech < 0
 
-            buff_shadow = ((buff_shadow << 8) & 0xffffffff) | thech
-            live_shadow += 8
+            @buff = ((@buff << 8) & 0xffffffff) | thech
+            @live += 8
           end
-          live_shadow -= 1
-          zvec = (zvec << 1) | ((buff_shadow >> live_shadow) & 1)
+          @live -= 1
+          zvec = (zvec << 1) | ((@buff >> @live) & 1)
         end
 
         next_sym = perm_zt[zvec - base_zt[zn]]
       end
     end
-
-    @last = last_shadow
-    @live = live_shadow
-    @buff = buff_shadow
   end
 
   def get_and_move_to_front_decode0(group_no)
-    zt = @data.selector[group_no] & 0xff
+    zt = @data.selector[group_no]
     limit_zt = @data.limit[zt]
     zn = @data.min_lens[zt]
     zvec = r zn
-    live_shadow = @live
-    buff_shadow = @buff
 
     while zvec > limit_zt[zn]
       zn += 1
 
-      while live_shadow < 1
+      while @live < 1
         thech = @io.readbyte
 
         raise 'unexpected end of stream' if thech < 0
 
-        buff_shadow = ((buff_shadow << 8) & 0xffffffff) | thech
-        live_shadow += 8
+        @buff = ((@buff << 8) & 0xffffffff) | thech
+        @live += 8
       end
 
-      live_shadow -=1
-      zvec = (zvec << 1) | ((buff_shadow >> live_shadow) & 1)
+      @live -=1
+      zvec = (zvec << 1) | ((@buff >> @live) & 1)
     end
-
-    @live = live_shadow
-    @buff = buff_shadow
 
     @data.perm[zt][zvec - @data.base[zt][zn]]
   end
@@ -521,15 +502,14 @@ class RBzip2::Ruby::Decompressor
     cftab[0] = 0
     cftab[1, 256] = @data.unzftab[0, 256]
 
-    c = cftab[0]
+    c = 0
     1.upto(256) do |i|
       c += cftab[i]
       cftab[i] = c
     end
 
-    last_shadow = @last
-    (last_shadow + 1).times do |i|
-      cftab_i = ll8[i] & 0xff
+    (@last + 1).times do |i|
+      cftab_i = ll8[i]
       tt[cftab[cftab_i]] = i
       cftab[cftab_i] += 1
     end
@@ -554,7 +534,7 @@ class RBzip2::Ruby::Decompressor
   def setup_rand_part_a
     if @su_i2 <= @last
       @su_ch_prev = @su_ch2
-      su_ch2_shadow = @data.ll8[@su_t_pos] & 0xff
+      su_ch2_shadow = @data.ll8[@su_t_pos]
       @su_t_pos = @data.tt[@su_t_pos]
 
       if @su_r_n_to_go == 0
@@ -580,7 +560,7 @@ class RBzip2::Ruby::Decompressor
   def setup_no_rand_part_a
     if @su_i2 <= @last
       @su_ch_prev = @su_ch2
-      su_ch2_shadow = @data.ll8[@su_t_pos] & 0xff
+      su_ch2_shadow = @data.ll8[@su_t_pos]
       @su_ch2 = su_ch2_shadow
       @su_t_pos = @data.tt[@su_t_pos]
       @su_i2 += 1
@@ -603,7 +583,7 @@ class RBzip2::Ruby::Decompressor
     else
       @su_count += 1
       if @su_count >= 4
-        @su_z = @data.ll8[@su_t_pos] & 0xff
+        @su_z = @data.ll8[@su_t_pos]
         @su_t_pos = @data.tt[@su_t_pos]
 
         if @su_r_n_to_go == 0
@@ -645,7 +625,7 @@ class RBzip2::Ruby::Decompressor
     else
       @su_count += 1
       if @su_count >= 4
-        @su_z = @data.ll8[@su_t_pos] & 0xff
+        @su_z = @data.ll8[@su_t_pos]
         @su_t_pos = @data.tt[@su_t_pos]
         @su_j2 = 0
         setup_no_rand_part_c
