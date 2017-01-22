@@ -280,7 +280,8 @@ class RBzip2::Ruby::Decompressor
       tmp = pos[v]
 
       while v > 0 do
-        pos[v] = pos[v -= 1]
+        v -= 1
+        pos[v + 1] = pos[v]
       end
 
       pos[0] = tmp
