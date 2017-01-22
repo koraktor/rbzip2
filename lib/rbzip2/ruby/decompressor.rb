@@ -27,7 +27,7 @@ class RBzip2::Ruby::Decompressor
   end
 
   def getc
-    read(1).chr
+    read 1
   end
 
   def gets
@@ -46,7 +46,7 @@ class RBzip2::Ruby::Decompressor
     if length == 1
       r = read0
       count (r < 0 ? -1 : 1)
-      r
+      r.chr
     else
       r = ''
       if length == nil
