@@ -602,8 +602,7 @@ class RBzip2::Ruby::Compressor
     fmap = data_shadow.fmap
     quadrant = data_shadow.quadrant
     block = data_shadow.block
-    last_shadow = @last
-    last_plus_1 = last_shadow + 1
+    last_plus_1 = @last + 1
 
     h = nil
     i1 = nil
@@ -696,7 +695,7 @@ class RBzip2::Ruby::Compressor
               if block[i1 + 4] == block[i2 + 4]
                 if block[i1 + 5] == block[i2 + 5]
                   if block[i1 += 6] == block[i2 += 6]
-                    x = last_shadow
+                    x = @last
 
                     break unless x_loop.call
                   else
@@ -1166,14 +1165,14 @@ class RBzip2::Ruby::Compressor
 
   def w(n, v)
     while @live >= 8
-      @io.write ((@buff >> 24) & 0xffffffff).chr
+      @io.write(((@buff >> 24) & 0xffffffff).chr)
       @buff <<= 8
       @buff &= 0xffffffff
       @live -= 8
     end
 
     @buff = @buff | (v << (32 - @live - n))
-    @live = @live + n
+    @live += n
   end
 
   def write(bytes)
