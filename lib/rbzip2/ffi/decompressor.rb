@@ -92,7 +92,7 @@ class RBzip2::FFI::Decompressor
   end
 
   def getc
-    read(1).chr
+    read 1
   end
 
   def gets
