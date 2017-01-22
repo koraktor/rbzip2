@@ -9,7 +9,7 @@ shared_examples_for 'a decompressor' do
 
   it 'acts like a standard IO' do
     methods = described_class.instance_methods.map { |m| m.to_sym }
-    methods.should include(:close, :read)
+    expect(methods).to include(:close, :getc, :gets, :read)
   end
 
   it 'knows its size' do
@@ -40,6 +40,24 @@ shared_examples_for 'a decompressor' do
     bz2_decompressor = described_class.new bz2_file
 
     expect(bz2_decompressor.read).to eq(txt_file.read)
+  end
+
+  it 'should be able to decompress a single character from compressed data' do
+    bz2_file = fixture 'fixtures/test.bz2'
+    bz2_decompressor = described_class.new bz2_file
+
+    expect(bz2_decompressor.getc).to eq('T')
+    expect(bz2_decompressor.getc).to eq('h')
+    expect(bz2_decompressor.getc).to eq('i')
+    expect(bz2_decompressor.getc).to eq('s')
+    expect(bz2_decompressor.getc).to eq(' ')
+  end
+
+  it 'should be able to decompress a single line from compressed data' do
+    bz2_file = fixture 'fixtures/test.bz2'
+    bz2_decompressor = described_class.new bz2_file
+
+    expect(bz2_decompressor.gets).to eq("This is a test fixture for RBzip2.\n")
   end
 
 end

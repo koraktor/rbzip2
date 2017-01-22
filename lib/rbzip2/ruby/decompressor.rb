@@ -26,6 +26,20 @@ class RBzip2::Ruby::Decompressor
     @bytes_read += read if read != -1
   end
 
+  def getc
+    read(1).chr
+  end
+
+  def gets
+    line = ''
+    loop do
+      char = getc
+      line += char
+      break if char == "\n"
+    end
+    line
+  end
+
   def read(length = nil)
     raise 'stream closed' if @io.nil?
 

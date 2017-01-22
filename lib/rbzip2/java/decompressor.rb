@@ -7,36 +7,42 @@ class RBzip2::Java::Decompressor
 
   def initialize(io)
     @io = io
+    @is = RBzip2::Java::BZip2CompressorInputStream.new io.to_inputstream
   end
 
   def close
-    if @io != $stdin
-      @io = nil
+    @is.close
+  end
+
+  def getc
+    read(1)[0].chr
+  end
+
+  def gets
+    line = ''
+    loop do
+      char = getc
+      line += char
+      break if char == "\n"
     end
+    line
   end
 
   def read(length = nil)
-    raise 'stream closed' if @io.nil?
-
-    is = RBzip2::Java::BZip2CompressorInputStream.new @io.to_inputstream
-
     if length.nil?
       bytes = Java::byte[0].new
+      chunk = Java::byte[1024].new
       begin
-        chunk = Java::byte[1024].new
-        bytes_read = is.read chunk
+        bytes_read = @is.read chunk
         chunk = chunk[0..(bytes_read - 1)] if bytes_read < 1024
         bytes += chunk
       end while bytes_read == 1024
-      data = String.from_java_bytes bytes
     else
-      data = Java::byte[length].new
-      is.read data
+      bytes = Java::byte[length].new
+      @is.read bytes
     end
 
-    is.close
-
-    data
+    String.from_java_bytes bytes
   end
 
   def size
