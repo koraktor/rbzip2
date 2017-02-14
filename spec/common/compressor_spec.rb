@@ -48,7 +48,7 @@ shared_examples_for 'a compressor' do
 
     base64_result = Base64.encode64 @io.string
 
-    expect(`echo "#{base64_result}" | base64 -D | bzcat`).to eq('Test')
+    expect(`echo "#{base64_result}" | base64 --decode | bzcat`).to eq('Test')
   end
 
   it 'should be able to compress a line of text' do
@@ -58,7 +58,7 @@ shared_examples_for 'a compressor' do
 
     base64_result = Base64.encode64 @io.string
 
-    expect(`echo "#{base64_result}" | base64 -D | bzcat`).to eq("Test 1#{$/}Test 2#{$/}")
+    expect(`echo "#{base64_result}" | base64 --decode | bzcat`).to eq("Test 1#{$/}Test 2#{$/}")
   end
 
   after do
