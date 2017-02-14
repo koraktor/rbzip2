@@ -1,7 +1,7 @@
 # This code is free software; you can redistribute it and/or modify it under
 # the terms of the new BSD License.
 #
-# Copyright (c) 2011-2013, Sebastian Staudt
+# Copyright (c) 2011-2017, Sebastian Staudt
 
 class RBzip2::IO
 
@@ -14,6 +14,22 @@ class RBzip2::IO
   def close
     @compressor.close
     @decompressor.close
+  end
+
+  def getc
+    @decompressor.getc
+  end
+
+  def gets
+    @decompressor.gets
+  end
+
+  def putc(int)
+    @compressor.putc int
+  end
+
+  def puts(line)
+    @compressor.puts line
   end
 
   def read
