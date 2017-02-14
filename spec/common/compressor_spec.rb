@@ -3,6 +3,8 @@
 #
 # Copyright (c) 2017, Sebastian Staudt
 
+require 'base64'
+
 require 'helper'
 
 shared_examples_for 'a compressor' do
@@ -14,7 +16,7 @@ shared_examples_for 'a compressor' do
 
   it 'acts like a standard IO' do
     methods = described_class.instance_methods.map &:to_sym
-    expect(methods).to include(:write, :close)
+    expect(methods).to include(:close, :putc, :puts, :write)
   end
 
   it 'should be able to compress raw data' do
@@ -39,6 +41,28 @@ shared_examples_for 'a compressor' do
     eq_bz2 = eq bz2_file.read
     eq_bz2.instance_variable_set :@diffable, false
     expect(@io.string).to eq_bz2
+  end
+
+  it 'should be able to compress a single character' do
+    @bz2_compressor.putc 'T'
+    @bz2_compressor.putc 'e'
+    @bz2_compressor.putc 's'
+    @bz2_compressor.putc 't'
+    @bz2_compressor.close
+
+    base64_result = Base64.encode64 @io.string
+
+    expect(`echo "#{base64_result}" | base64 -D | bzcat`).to eq('Test')
+  end
+
+  it 'should be able to compress a line of text' do
+    @bz2_compressor.puts 'Test 1'
+    @bz2_compressor.puts 'Test 2'
+    @bz2_compressor.close
+
+    base64_result = Base64.encode64 @io.string
+
+    expect(`echo "#{base64_result}" | base64 -D | bzcat`).to eq("Test 1#{$/}Test 2#{$/}")
   end
 
   after do

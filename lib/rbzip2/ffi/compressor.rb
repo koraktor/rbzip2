@@ -64,6 +64,18 @@ class RBzip2::FFI::Compressor
     end
   end
 
+  def putc(int)
+    if int.is_a? Numeric
+      write int & 0xff
+    else
+      write int.to_s[0]
+    end
+  end
+
+  def puts(line)
+    write line + $/
+  end
+
   def write(bytes)
     raise 'stream closed' if @io.nil?
 

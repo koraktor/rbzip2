@@ -767,6 +767,18 @@ class RBzip2::Ruby::Compressor
     send_mtf_values
   end
 
+  def putc(int)
+    if int.is_a? Numeric
+      put_byte int & 0xff
+    else
+      write int.to_s[0]
+    end
+  end
+
+  def puts(line)
+    write line + $/
+  end
+
   def put_byte(c)
     c = c[0].to_i if c.is_a? String
     w 8, c
