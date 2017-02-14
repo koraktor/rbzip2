@@ -771,7 +771,7 @@ class RBzip2::Ruby::Compressor
     if int.is_a? Numeric
       put_byte int & 0xff
     else
-      write int.to_s[0]
+      write int.to_s[0].chr
     end
   end
 
