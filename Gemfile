@@ -14,6 +14,7 @@ end
 
 if Bundler.current_ruby.jruby_1? || Bundler.current_ruby.ruby_1?
   gem 'json', '< 2'
+  gem 'rake', '< 12'
   gem 'term-ansicolor', '< 1.4'
   gem 'tins', '< 1.7'
 end
