@@ -5,7 +5,7 @@ group :development do
   gem 'rake', '~> 12.0'
   gem 'rspec-core', '~> 3.5'
   gem 'rspec-expectations', '~> 3.5'
-  gem 'yard', '~> 0.8.6'
+  gem 'yard', '~> 0.9'
 end
 
 group :test do
