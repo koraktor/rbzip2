@@ -25,9 +25,7 @@ shared_examples_for 'a compressor' do
     @bz2_compressor.write txt_file.read
     @bz2_compressor.close
 
-    eq_bz2 = eq bz2_file.read
-    eq_bz2.instance_variable_set :@diffable, false
-    expect(@io.string).to eq_bz2
+    expect(@io.string).to eq(bz2_file.read)
   end
 
   it 'should be able to compress large raw data' do
@@ -38,9 +36,7 @@ shared_examples_for 'a compressor' do
     @bz2_compressor.write txt_file.read
     @bz2_compressor.close
 
-    eq_bz2 = eq bz2_file.read
-    eq_bz2.instance_variable_set :@diffable, false
-    expect(@io.string).to eq_bz2
+    expect(@io.string).to eq(bz2_file.read)
   end
 
   it 'should be able to compress a single character' do
