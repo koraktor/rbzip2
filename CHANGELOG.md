@@ -2,6 +2,7 @@
 
  * [FEATURE] De-/compress using libbz2 via FFI
  * [FEATURE] De-/compress using Commons Compress on JRuby
+ * [FEATURE] Implement getc/gets and putc/puts
  * [ENHANCEMENT] Performance improvements for the pure Ruby implementation
 
 ## Version 0.2.0 / 2011-11-11
