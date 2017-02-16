@@ -2,7 +2,7 @@
 # the terms of the new BSD License.
 #
 # Copyright (c) 2013, Brian Lopez
-# Copyright (c) 2013, Sebastian Staudt
+# Copyright (c) 2013-2017, Sebastian Staudt
 
 class RBzip2::FFI::Compressor
 
