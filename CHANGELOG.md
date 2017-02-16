@@ -1,4 +1,4 @@
-## Version 0.3.0 / Unreleased
+## Version 0.3.0 / 2017-02-16
 
  * [FEATURE] De-/compress using libbz2 via FFI
  * [FEATURE] De-/compress using Commons Compress on JRuby
