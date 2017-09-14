@@ -1,4 +1,4 @@
-VERSION=1.13
+VERSION=1.14
 JAR_PATH=commons-compress-${VERSION}/commons-compress-${VERSION}.jar
 URL=http://www.us.apache.org/dist/commons/compress/binaries/commons-compress-${VERSION}-bin.tar.gz
 
