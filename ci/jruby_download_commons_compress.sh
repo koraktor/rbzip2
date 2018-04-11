@@ -1,6 +1,6 @@
-VERSION=1.14
+VERSION=1.16.1
 JAR_PATH=commons-compress-${VERSION}/commons-compress-${VERSION}.jar
-URL=http://www.us.apache.org/dist/commons/compress/binaries/commons-compress-${VERSION}-bin.tar.gz
+URL=http://archive.apache.org/dist/commons/compress/binaries/commons-compress-${VERSION}-bin.tar.gz
 
 if `ruby -v | grep -q jruby`; then
   mkdir java > /dev/null 2>&1
