@@ -16,7 +16,7 @@ class RBzip2::FFI::Decompressor
                   [:pointer],
                   :int
 
-  ffi_lib 'bz2'
+  ffi_lib ::RBzip2::FFI::LIBBZ2
   attach_function :BZ2_bzRead,
                   [:pointer, :pointer, :pointer, :int],
                   :int
