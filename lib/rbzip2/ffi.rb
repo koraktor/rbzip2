@@ -9,11 +9,12 @@ rescue LoadError
 end
 
 module RBzip2::FFI
+  LIBBZ2 = ['bz2', 'libbz2.so.1']
 
   def self.init
     begin
       extend ::FFI::Library
-      ffi_lib ['bz2', 'libbz2.so.1']
+      ffi_lib LIBBZ2
     rescue NameError, LoadError
       @@available = false
     end
